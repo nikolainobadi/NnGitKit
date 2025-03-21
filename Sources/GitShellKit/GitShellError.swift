@@ -7,5 +7,6 @@
 
 public enum GitShellError: Error {
     case missingLocalGit
+    case localGitAlreadyExists
     case remoteRepoAlreadyExists
 }

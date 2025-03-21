@@ -10,10 +10,12 @@ import GitCommandGen
 public struct GitStarter {
     private let path: String?
     private let shell: GitShell
+    private let ignoreErrors: Bool
     
-    public init(path: String?, shell: GitShell) {
+    public init(path: String?, shell: GitShell, ignoreErrors: Bool = false) {
         self.path = path
         self.shell = shell
+        self.ignoreErrors = ignoreErrors
     }
 }
 
@@ -21,10 +23,12 @@ public struct GitStarter {
 // MARK: - Actions
 public extension GitStarter {
     func gitInit() throws {
-        if try !shell.localGitExists(at: path) {
-            try shell.runWithOutput(makeGitCommand(.gitInit, path: path))
-            try shell.runWithOutput(makeGitCommand(.addAll, path: path))
-            try shell.runWithOutput(makeGitCommand(.commit("Initial Commit"), path: path))
+        if try shell.localGitExists(at: path), !ignoreErrors {
+            throw GitShellError.localGitAlreadyExists
         }
+        
+        try shell.runWithOutput(makeGitCommand(.gitInit, path: path))
+        try shell.runWithOutput(makeGitCommand(.addAll, path: path))
+        try shell.runWithOutput(makeGitCommand(.commit("Initial Commit"), path: path))
     }
 }
