@@ -6,6 +6,7 @@
 //
 
 public enum GitHubShellCommand {
+    case getGithubUsername
     case getLatestReleaseAssetURL
     case getPreviousReleaseVersion
     case createRemoteRepo(name: String, visibility: String, details: String)
@@ -17,6 +18,8 @@ public enum GitHubShellCommand {
 public extension GitHubShellCommand {
     var arg: String {
         switch self {
+        case .getGithubUsername:
+            return "gh api user --jq '.login'"
         case .getLatestReleaseAssetURL:
             return "gh release view --json assets -q '.assets[].url'"
         case .getPreviousReleaseVersion:
