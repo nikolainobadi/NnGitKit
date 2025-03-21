@@ -6,7 +6,6 @@
 //
 
 import Testing
-import Foundation
 @testable import GitShellKit
 
 struct GitStarterTests {

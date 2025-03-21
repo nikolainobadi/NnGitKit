@@ -34,15 +34,19 @@ public extension GitHubRepoStarter {
             throw GitShellError.remoteRepoAlreadyExists
         }
         
-        let name = try infoProvider.getProjectName()
-        let username = try infoProvider.getUsername()
-        let visibility = try infoProvider.getVisibility()
-        let details = try infoProvider.getProjectDetails()
         let currentBranchName = try shell.runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
         
+        if currentBranchName != "main" {
+            if try !infoProvider.canUploadFromNonMainBranch() {
+                throw GitShellError.currentBranchIsNotMainBranch
+            }
+        }
+        
+        let name = try infoProvider.getProjectName()
+        let visibility = try infoProvider.getVisibility()
+        let details = try infoProvider.getProjectDetails()
+        
         try shell.runWithOutput(makeGitHubCommand(.createRemoteRepo(name: name, visibility: visibility.rawValue, details: details), path: path))
-        try shell.runWithOutput(makeGitCommand(.addGitHubRemote(username: username, projectName: name), path: path))
-        try shell.runWithOutput(makeGitCommand(.pushNewRemote(branchName: currentBranchName), path: path))
         
         return try shell.getGitHubURL(at: path)
     }
@@ -56,8 +60,8 @@ public enum RepoVisibility: String, CaseIterable {
 }
 
 public protocol RepoInfoProvider {
-    func getUsername() throws -> String
     func getProjectName() throws -> String
     func getProjectDetails() throws -> String
     func getVisibility() throws -> RepoVisibility
+    func canUploadFromNonMainBranch() throws -> Bool
 }
