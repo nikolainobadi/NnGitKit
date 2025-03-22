@@ -1,7 +1,7 @@
 # NnGitKit
 
 ![CI](https://github.com/nikolainobadi/NnGitKit/actions/workflows/ci.yml/badge.svg)
-![Swift Version](https://img.shields.io/badge/Swift-5.10-orange)
+![Swift Version](https://img.shields.io/badge/Swift-6.0-orange)
 ![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey)
 ![SPM](https://img.shields.io/badge/Distribution-SPM%20only-red)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
