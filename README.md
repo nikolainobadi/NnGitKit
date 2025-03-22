@@ -101,7 +101,8 @@ do {
 ### Creating a GitHub Repository
 
 ```swift
-let repoStarter = GitHubRepoStarter(path: "/path/to/project", shell: YourShellImplementation(), infoProvider: YourRepoInfoProvider())
+let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, canUploadFromNonMainBranch: false)
+let repoStarter = GitHubRepoStarter(path: "/path/to/project", shell: YourShellImplementation(), repoInfo: info)
 
 do {
     let url = try repoStarter.repoInit()
@@ -145,51 +146,6 @@ do {
     print("Repository initialized successfully.")
 } catch {
     print("Failed to initialize repository: \(error)")
-}
-```
-
-## Using SwiftPicker for User Input (optional)
-
-You can use **[SwiftPicker](https://github.com/nikolainobadi/SwiftPicker)** to interactively gather user input when creating repositories.  
-Here’s an example of creating a `RepoInfoProviderAdapter` that leverages SwiftPicker for two of the required inputs:
-
-```swift
-import GitShellKit
-import SwiftPicker
-
-struct RepoInfoProviderAdapter: RepoInfoProvider {
-    private let picker = SwiftPicker()
-    
-    func getProjectName() throws -> String {
-        return "MyAwesomeRepo"
-    }
-    
-    func getVisibility() throws -> RepoVisibility {
-        return try picker.requiredSingleSelection(title: "Select Repository Visibility", options: RepoVisibility.allCases)
-    }
-    
-    func getProjectDetails() throws -> String {
-        return try picker.getRequiredInput("Enter details for this project")
-    }
-    
-    func canUploadFromNonMainBranch() throws -> Bool {
-        return false
-    }
-}
-```
-
-### Usage Example
-
-```swift
-let shell = GitShellAdapter()
-let infoProvider = RepoInfoProviderAdapter()
-let repoStarter = GitHubRepoStarter(path: "/path/to/project", shell: shell, infoProvider: infoProvider)
-
-do {
-    let url = try repoStarter.repoInit()
-    print("Repository created at \(url)")
-} catch {
-    print("Error creating repository: \(error)")
 }
 ```
 

@@ -72,8 +72,8 @@ extension GitHubRepoStarterTests {
 private extension GitHubRepoStarterTests {
     func makeSUT(visibility: RepoVisibility = .publicRepo, canUploadNonMainBranch: Bool = false, path: String? = nil, runResults: [String] = [], throwError: Bool = false) -> (sut: GitHubRepoStarter, shell: MockShell) {
         let shell = MockShell(runResults: runResults, throwError: throwError)
-        let infoProvider = MockRepoInfoProvider(projectName: projectName, details: projectDetails, visibility: visibility, canUploadNonMainBranch: canUploadNonMainBranch)
-        let sut = GitHubRepoStarter(path: path ?? defaultPath, shell: shell, infoProvider: infoProvider)
+        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, canUploadFromNonMainBranch: canUploadNonMainBranch)
+        let sut = GitHubRepoStarter(path: path ?? defaultPath, shell: shell, repoInfo: info)
         
         return (sut, shell)
     }
