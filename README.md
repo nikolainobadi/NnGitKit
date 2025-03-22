@@ -1,5 +1,6 @@
 # NnGitKit
 
+![CI](https://github.com/nikolainobadi/NnGitKit/actions/workflows/ci.yml/badge.svg)
 ![Swift Version](https://img.shields.io/badge/Swift-5.10-orange)
 ![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey)
 ![SPM](https://img.shields.io/badge/Distribution-SPM%20only-red)
