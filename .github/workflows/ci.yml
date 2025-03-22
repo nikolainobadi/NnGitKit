@@ -1,12 +1,12 @@
 name: Swift CI
 
 on:
-  push:
-    branches:
-      - ci-actions
+  # push:
+  #   branches:
+  #     - ci-actions
   pull_request:
     branches:
-      - ci-actions
+      - main
 
 jobs:
   build:
