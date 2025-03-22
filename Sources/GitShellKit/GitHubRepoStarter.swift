@@ -68,7 +68,7 @@ public extension GitHubRepoStarter {
 
 // MARK: - Dependencies
 /// Represents the visibility options for a GitHub repository.
-public enum RepoVisibility: String, CaseIterable {
+public enum RepoVisibility: String, CaseIterable, Sendable {
     /// The repository is publicly accessible.
     case publicRepo = "public"
     /// The repository is private and restricted.
