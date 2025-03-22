@@ -12,18 +12,18 @@ import GitCommandGen
 public struct GitHubRepoStarter {
     private let path: String?
     private let shell: GitShell
-    private let infoProvider: RepoInfoProvider
+    private let repoInfo: RepoInfo
 
-    /// Initializes a `GitHubRepoStarter` with the given path, shell, and info provider.
+    /// Initializes a `GitHubRepoStarter` with the given path, shell, and repoInfo.
     ///
     /// - Parameters:
     ///   - path: The file system path where the repository should be initialized.
     ///   - shell: The shell implementation for running Git commands.
-    ///   - infoProvider: An object that provides repository information.
-    public init(path: String?, shell: GitShell, infoProvider: RepoInfoProvider) {
+    ///   - repoInfo: An object that provides repository information.
+    public init(path: String?, shell: GitShell, repoInfo: RepoInfo) {
         self.path = path
         self.shell = shell
-        self.infoProvider = infoProvider
+        self.repoInfo = repoInfo
     }
 }
 
@@ -48,17 +48,13 @@ public extension GitHubRepoStarter {
         let currentBranchName = try shell.runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
 
         if currentBranchName != "main" {
-            if try !infoProvider.canUploadFromNonMainBranch() {
+            if !repoInfo.canUploadFromNonMainBranch {
                 throw GitShellError.currentBranchIsNotMainBranch
             }
         }
 
-        let name = try infoProvider.getProjectName()
-        let visibility = try infoProvider.getVisibility()
-        let details = try infoProvider.getProjectDetails()
-
         try shell.runWithOutput(
-            makeGitHubCommand(.createRemoteRepo(name: name, visibility: visibility.rawValue, details: details), path: path)
+            makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
         )
 
         return try shell.getGitHubURL(at: path)
@@ -75,18 +71,16 @@ public enum RepoVisibility: String, CaseIterable, Sendable {
     case privateRepo = "private"
 }
 
-/// A protocol that provides necessary information for creating and managing a GitHub repository.
-public protocol RepoInfoProvider {
-    /// Retrieves the project name.
-    func getProjectName() throws -> String
-
-    /// Retrieves the project details or description.
-    func getProjectDetails() throws -> String
-
-    /// Retrieves the visibility of the repository.
-    func getVisibility() throws -> RepoVisibility
-
-    /// Determines whether uploading from a non-main branch is allowed.
-    func canUploadFromNonMainBranch() throws -> Bool
+public struct RepoInfo {
+    public let name: String
+    public let details: String
+    public let visibility: RepoVisibility
+    public let canUploadFromNonMainBranch: Bool
+    
+    public init(name: String, details: String, visibility: RepoVisibility, canUploadFromNonMainBranch: Bool) {
+        self.name = name
+        self.details = details
+        self.visibility = visibility
+        self.canUploadFromNonMainBranch = canUploadFromNonMainBranch
+    }
 }
-
