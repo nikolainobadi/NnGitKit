@@ -30,7 +30,7 @@ public enum GitHubShellCommand {
     ///   - version: The version tag for the release.
     ///   - binaryPath: The path to the binary to include in the release.
     ///   - releaseNotes: The notes to include with the release.
-    case createNewReleaseWithBinary(version: String, binaryPath: String, releaseNotes: String)
+    case createNewReleaseWithBinary(version: String, binaryPath: String, releaseNoteInfo: ReleaseNoteInfo)
 }
 
 // MARK: - Arg
@@ -46,9 +46,9 @@ public extension GitHubShellCommand {
             return "gh release view --json tagName -q '.tagName'"
         case .createRemoteRepo(let name, let visibility, let details):
             return "gh repo create \(name) --\(visibility) -d '\(details)'"
-        case .createNewReleaseWithBinary(let version, let binaryPath, let releaseNotes):
+        case .createNewReleaseWithBinary(let version, let binaryPath, let releaseNoteInfo):
             return """
-            gh release create \(version) \(binaryPath) --title "\(version)" --notes "\(releaseNotes)"
+            gh release create \(version) \(binaryPath) --title "\(version)" \(releaseNoteInfo.arg)"
             """
         }
     }

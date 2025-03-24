@@ -13,6 +13,5 @@ let package = Package(
         .target(name: "GitCommandGen"),
         .target(name: "GitShellKit", dependencies: ["GitCommandGen"]),
         .testTarget(name: "NnGitKitTests", dependencies: ["GitShellKit"])
-        
     ]
 )
