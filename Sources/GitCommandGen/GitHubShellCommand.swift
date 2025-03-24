@@ -48,7 +48,7 @@ public extension GitHubShellCommand {
             return "gh repo create \(name) --\(visibility) -d '\(details)'"
         case .createNewReleaseWithBinary(let version, let binaryPath, let releaseNoteInfo):
             return """
-            gh release create \(version) \(binaryPath) --title "\(version)" \(releaseNoteInfo.arg)"
+            gh release create \(version) \(binaryPath) --title "\(version)" \(releaseNoteInfo.arg)
             """
         }
     }

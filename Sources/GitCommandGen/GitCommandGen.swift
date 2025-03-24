@@ -26,8 +26,11 @@ public func makeGitCommand(_ command: GitShellCommand, path: String?) -> String 
 /// - Returns: A formatted GitHub command string.
 public func makeGitHubCommand(_ command: GitHubShellCommand, path: String?) -> String {
     if let path {
-        return "cd \"\(path)\" && \(command.arg)"
+        return """
+        cd \"\(path)\" && \(command.arg)
+        """
     }
+    
     return command.arg
 }
 

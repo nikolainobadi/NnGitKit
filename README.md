@@ -26,7 +26,7 @@ Add the package to your Swift project using Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/YourUsername/NnGitKit.git", from: "1.0.0")
+    .package(url: "https://github.com/nikolainobadi/NnGitKit.git", from: "1.0.0")
 ],
 targets: [
     .target(

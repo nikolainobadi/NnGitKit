@@ -19,6 +19,6 @@ public struct ReleaseNoteInfo {
 // MARK: - Arg
 extension ReleaseNoteInfo {
     var arg: String {
-        return "--notes\(isFromFile ? "-file" : "") \(content)"
+        return "--notes\(isFromFile ? "-file" : "") \"\(content)\""
     }
 }
