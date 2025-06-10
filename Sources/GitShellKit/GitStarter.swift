@@ -41,6 +41,6 @@ public extension GitStarter {
 
         try shell.runWithOutput(makeGitCommand(.gitInit, path: path))
         try shell.runWithOutput(makeGitCommand(.addAll, path: path))
-        try shell.runWithOutput(makeGitCommand(.commit("Initial Commit"), path: path))
+        try shell.runWithOutput(makeGitCommand(.commit(message: "Initial Commit"), path: path))
     }
 }

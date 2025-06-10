@@ -49,6 +49,18 @@ public extension GitShell {
         let remotes = output.split(separator: "\n").map(String.init)
         return remotes.contains("origin")
     }
+    
+    /// Runs a Git command and returns the resulting output string.
+    ///
+    /// - Parameters:
+    ///   - command: The `GitShellCommand` to execute.
+    ///   - path: The optional path to the Git repository where the command should be run.
+    /// - Returns: The output from the Git command as a string.
+    /// - Throws: An error if the command execution fails.
+    @discardableResult
+    func runGitCommandWithOutput(_ command: GitShellCommand, path: String?) throws -> String {
+        return try runWithOutput(makeGitCommand(command, path: path))
+    }
 }
 
 

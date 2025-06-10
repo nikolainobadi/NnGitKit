@@ -18,12 +18,12 @@ public enum GitShellCommand {
     /// Commits changes with the specified message.
     ///
     /// - Parameter message: The commit message.
-    case commit(String)
+    case commit(message: String)
     
     // MARK: - Repository
     
-    /// Pulls changes from the remote repository.
-    case pull
+    /// Pulls changes from the remote, optionally using rebase.
+    case pull(withRebase: Bool)
     
     /// Pushes local changes to the remote repository.
     case push
@@ -43,12 +43,12 @@ public enum GitShellCommand {
     /// Clones a repository from the specified URL.
     ///
     /// - Parameter url: The URL of the repository to clone.
-    case clone(String)
+    case clone(url: String)
     
     /// Rebases the current branch onto the specified branch.
     ///
     /// - Parameter branch: The branch to rebase onto.
-    case rebase(String)
+    case rebase(onto: String)
     
     /// Checks for the presence of a remote origin.
     case checkForRemote
@@ -70,7 +70,7 @@ public enum GitShellCommand {
     /// Creates a new branch with the specified name.
     ///
     /// - Parameter name: The name of the new branch.
-    case newBranch(String)
+    case newBranch(branchName: String)
     
     /// Lists all local branches.
     case listLocalBranches
@@ -87,12 +87,12 @@ public enum GitShellCommand {
     /// Switches to the specified branch.
     ///
     /// - Parameter name: The name of the branch to switch to.
-    case switchBranch(String)
+    case switchBranch(branchName: String)
     
     /// Retrieves the creation date of the specified branch.
     ///
     /// - Parameter branch: The name of the branch.
-    case getBranchCreationDate(String)
+    case getBranchCreationDate(branchName: String)
     
     /// Deletes the specified branch.
     ///
@@ -134,8 +134,8 @@ extension GitShellCommand {
             return "commit -m \"\(message)\""
             
         // Repository
-        case .pull:
-            return "pull"
+        case .pull(let withRebase):
+            return "pull\(withRebase ? " --rebase" : "")"
         case .push:
             return "push"
         case .fetchOrigin:

@@ -62,6 +62,6 @@ private extension GitStarterTests {
         #expect(shell.commands[0] == makeGitCommand(.localGitCheck, path: defaultPath))
         #expect(shell.commands[1] == makeGitCommand(.gitInit, path: defaultPath))
         #expect(shell.commands[2] == makeGitCommand(.addAll, path: defaultPath))
-        #expect(shell.commands[3] == makeGitCommand(.commit("Initial Commit"), path: defaultPath))
+        #expect(shell.commands[3] == makeGitCommand(.commit(message: "Initial Commit"), path: defaultPath))
     }
 }
