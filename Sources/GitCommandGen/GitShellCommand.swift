@@ -76,7 +76,7 @@ public enum GitShellCommand {
     case listLocalBranches
     
     /// Lists all branches that have been merged into the main branch.
-    case listMergedBranches
+    case listMergedBranches(branchName: String)
     
     /// Lists all remote branches.
     case listRemoteBranches
@@ -162,8 +162,8 @@ extension GitShellCommand {
             return "checkout -b \(name)"
         case .listLocalBranches:
             return "branch --list"
-        case .listMergedBranches:
-            return "branch --merged main"
+        case .listMergedBranches(let branchName):
+            return "branch --merged \(branchName)"
         case .listRemoteBranches:
             return "branch -r"
         case .switchBranch(let name):
