@@ -8,11 +8,7 @@
 import Testing
 @testable import GitShellKit
 
-struct GitShellOutputURLTests { }
-
-
-// MARK: - Unit Tests
-extension GitShellOutputURLTests {
+struct GitShellOutputURLTests { 
     @Test("Normalizes SSH style GitHub URLs to https")
     func normalizesSSHURLs() {
         #expect(GitShellOutput.normalizeGitHubURL("git@github.com:user/repo.git") == "https://github.com/user/repo")
