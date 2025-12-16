@@ -8,7 +8,7 @@
 import Foundation
 
 /// Helpers that centralize parsing assumptions for Git and GitHub CLI output.
-enum GitShellOutput {
+internal enum GitShellOutput {
     /// Determines whether a shell output represents a true value.
     static func isTrue(_ output: String) -> Bool {
         output.trimmingCharacters(in: .whitespacesAndNewlines) == "true"

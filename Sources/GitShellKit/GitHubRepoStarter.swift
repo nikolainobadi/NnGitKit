@@ -47,7 +47,7 @@ public extension GitHubRepoStarter {
     func repoInit() throws -> GitHubURL {
         _ = try validateRepoInit()
 
-        return try createRemoteRepoAndFetchURL()
+        return try createRemoteRepoAndGetURL()
     }
     
     /// Validates that the repository is ready for initialization on GitHub.
@@ -63,7 +63,9 @@ public extension GitHubRepoStarter {
             throw GitShellError.remoteRepoAlreadyExists
         }
 
-        let currentBranchName = try shell.runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
+        let currentBranchName = try shell
+            .runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
         if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName) {
             throw GitShellError.currentBranchIsNotMainBranch
@@ -76,7 +78,7 @@ public extension GitHubRepoStarter {
     ///
     /// - Returns: The GitHub URL for the newly created remote.
     /// - Throws: An error if any command fails.
-    func createRemoteRepoAndFetchURL() throws -> GitHubURL {
+    func createRemoteRepoAndGetURL() throws -> GitHubURL {
         try shell.runWithOutput(
             makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
         )
