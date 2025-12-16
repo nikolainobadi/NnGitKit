@@ -28,7 +28,6 @@ public struct GitStarter {
 
 // MARK: - Actions
 public extension GitStarter {
-
     /// Initializes a new Git repository at the specified path.
     ///
     /// If a Git repository already exists and `ignoreErrors` is `false`, an error will be thrown.

@@ -27,15 +27,6 @@ public struct GitHubRepoStarter {
     }
 }
 
-// MARK: - Types
-public extension GitHubRepoStarter {
-    typealias GitHubURL = String
-    
-    /// Represents the validation state before initializing a GitHub repository.
-    struct RepoInitValidation {
-        public let currentBranchName: String
-    }
-}
 
 // MARK: - Actions
 public extension GitHubRepoStarter {
@@ -117,44 +108,12 @@ public extension GitHubRepoStarter {
 }
 
 
-// MARK: - Dependencies
-/// Represents the visibility options for a GitHub repository.
-public enum RepoVisibility: String, CaseIterable, Sendable {
-    /// The repository is publicly accessible.
-    case publicRepo = "public"
-    /// The repository is private and restricted.
-    case privateRepo = "private"
-}
-
-/// Branch upload policy for initializing the GitHub repository.
-public enum BranchPolicy: Sendable {
-    /// Only allow uploads from the main branch.
-    case mainOnly
-    /// Allow uploads from any branch (including non-main).
-    case allowNonMain
+// MARK: - Types
+public extension GitHubRepoStarter {
+    typealias GitHubURL = String
     
-    func allowsUpload(from branchName: String, defaultBranch: String) -> Bool {
-        switch self {
-        case .mainOnly:
-            return branchName == defaultBranch
-        case .allowNonMain:
-            return true
-        }
-    }
-}
-
-public struct RepoInfo {
-    public let name: String
-    public let details: String
-    public let visibility: RepoVisibility
-    public let branchPolicy: BranchPolicy
-    public let defaultBranch: String
-    
-    public init(name: String, details: String, visibility: RepoVisibility, branchPolicy: BranchPolicy, defaultBranch: String = "main") {
-        self.name = name
-        self.details = details
-        self.visibility = visibility
-        self.branchPolicy = branchPolicy
-        self.defaultBranch = defaultBranch
+    /// Represents the validation state before initializing a GitHub repository.
+    struct RepoInitValidation {
+        public let currentBranchName: String
     }
 }
