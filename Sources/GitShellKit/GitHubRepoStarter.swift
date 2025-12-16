@@ -55,6 +55,8 @@ public extension GitHubRepoStarter {
     /// - Returns: The validation details including the current branch name.
     /// - Throws: `GitShellError` if validation fails.
     func validateRepoInit() throws -> RepoInitValidation {
+        try validateGitHubCLI()
+        
         guard try shell.localGitExists(at: path) else {
             throw GitShellError.missingLocalGit
         }
@@ -84,6 +86,23 @@ public extension GitHubRepoStarter {
         )
         
         return try shell.getGitHubURL(at: path)
+    }
+    
+    /// Ensures the GitHub CLI is available and authenticated before attempting remote creation.
+    ///
+    /// - Throws: `GitShellError.githubCLINotAvailable` or `GitShellError.githubCLINotAuthenticated`.
+    func validateGitHubCLI() throws {
+        do {
+            _ = try shell.runWithOutput(makeGitHubCommand(.version, path: path))
+        } catch {
+            throw GitShellError.githubCLINotAvailable
+        }
+        
+        do {
+            _ = try shell.runWithOutput(makeGitHubCommand(.authStatus, path: path))
+        } catch {
+            throw GitShellError.githubCLINotAuthenticated
+        }
     }
 }
 

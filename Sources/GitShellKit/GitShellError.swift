@@ -15,4 +15,8 @@ public enum GitShellError: Error {
     case remoteRepoAlreadyExists
     /// Indicates that the current branch is not the main branch.
     case currentBranchIsNotMainBranch
+    /// Indicates that the GitHub CLI is not installed or not available on PATH.
+    case githubCLINotAvailable
+    /// Indicates that the GitHub CLI is not authenticated.
+    case githubCLINotAuthenticated
 }

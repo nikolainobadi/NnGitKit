@@ -31,6 +31,12 @@ public enum GitHubShellCommand {
     ///   - binaryPath: The path to the binary to include in the release.
     ///   - releaseNotes: The notes to include with the release.
     case createNewReleaseWithBinary(version: String, binaryPath: String, releaseNoteInfo: ReleaseNoteInfo)
+    
+    /// Checks the authentication status for the GitHub CLI.
+    case authStatus
+    
+    /// Checks that the GitHub CLI is available on the system.
+    case version
 }
 
 // MARK: - Arg
@@ -50,6 +56,10 @@ public extension GitHubShellCommand {
             return """
             gh release create \(version) \(binaryPath) --title "\(version)" \(releaseNoteInfo.arg)
             """
+        case .authStatus:
+            return "gh auth status"
+        case .version:
+            return "gh --version"
         }
     }
 }
