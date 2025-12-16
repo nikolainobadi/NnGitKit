@@ -17,6 +17,12 @@ public protocol GitShell {
     /// - Throws: An error if the command fails.
     @discardableResult
     func runWithOutput(_ command: String) throws -> String
+    
+    /// Runs a command where the output is not needed.
+    ///
+    /// - Parameter command: The command string to execute.
+    /// - Throws: An error if the command fails.
+    func runAndPrint(_ command: String) throws
 }
 
 
@@ -165,5 +171,10 @@ public extension GitShell {
             let output = (nsError.userInfo[NSLocalizedFailureReasonErrorKey] as? String ?? nsError.localizedDescription)
             throw GitCommandFailure(command: command, output: output)
         }
+    }
+    
+    /// Runs a command without needing to capture output.
+    func runAndPrint(_ command: String) throws {
+        _ = try runWithOutputWrappingFailure(command)
     }
 }

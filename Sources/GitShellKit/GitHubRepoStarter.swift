@@ -71,7 +71,7 @@ public extension GitHubRepoStarter {
             commands.append(createCommand)
             
             if mode == .execute {
-                try shell.runWithOutputWrappingFailure(createCommand)
+                try shell.runAndPrint(createCommand)
                 remoteCreated = true
             }
             
@@ -113,7 +113,7 @@ public extension GitHubRepoStarter {
         commands.append(versionCommand)
         if mode == .execute {
             do {
-                _ = try shell.runWithOutputWrappingFailure(versionCommand)
+                try shell.runAndPrint(versionCommand)
             } catch {
                 throw GitShellError.githubCLINotAvailable
             }
@@ -123,7 +123,7 @@ public extension GitHubRepoStarter {
         commands.append(authCommand)
         if mode == .execute {
             do {
-                _ = try shell.runWithOutputWrappingFailure(authCommand)
+                try shell.runAndPrint(authCommand)
             } catch {
                 throw GitShellError.githubCLINotAuthenticated
             }
@@ -173,7 +173,7 @@ public extension GitHubRepoStarter {
         var remoteCreated = false
         
         do {
-            try shell.runWithOutputWrappingFailure(
+            try shell.runAndPrint(
                 makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
             )
             remoteCreated = true
@@ -192,13 +192,13 @@ public extension GitHubRepoStarter {
     /// - Throws: `GitShellError.githubCLINotAvailable` or `GitShellError.githubCLINotAuthenticated`.
     func validateGitHubCLI() throws {
         do {
-            _ = try shell.runWithOutputWrappingFailure(makeGitHubCommand(.version, path: path))
+            try shell.runAndPrint(makeGitHubCommand(.version, path: path))
         } catch {
             throw GitShellError.githubCLINotAvailable
         }
         
         do {
-            _ = try shell.runWithOutputWrappingFailure(makeGitHubCommand(.authStatus, path: path))
+            try shell.runAndPrint(makeGitHubCommand(.authStatus, path: path))
         } catch {
             throw GitShellError.githubCLINotAuthenticated
         }

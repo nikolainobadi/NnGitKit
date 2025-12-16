@@ -33,4 +33,15 @@ extension MockShell: GitShell {
         
         return runResults.isEmpty ? "" : runResults.removeFirst()
     }
+    
+    func runAndPrint(_ command: String) throws {
+        commands.append(command)
+        if throwError || errorIndices.contains(commands.count - 1) {
+            throw GitCommandFailure(command: command, output: "error-\(commands.count - 1)")
+        }
+        
+        if !runResults.isEmpty {
+            _ = runResults.removeFirst()
+        }
+    }
 }

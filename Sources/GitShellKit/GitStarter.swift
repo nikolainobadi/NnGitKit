@@ -58,19 +58,19 @@ public extension GitStarter {
         let initCommand = makeGitCommand(.gitInit, path: path)
         commands.append(initCommand)
         if mode == .execute {
-            try shell.runWithOutputWrappingFailure(initCommand)
+            try shell.runAndPrint(initCommand)
         }
         
         let addCommand = makeGitCommand(.addAll, path: path)
         commands.append(addCommand)
         if mode == .execute {
-            try shell.runWithOutputWrappingFailure(addCommand)
+            try shell.runAndPrint(addCommand)
         }
         
         let commitCommand = makeGitCommand(.commit(message: "Initial Commit"), path: path)
         commands.append(commitCommand)
         if mode == .execute {
-            try shell.runWithOutputWrappingFailure(commitCommand)
+            try shell.runAndPrint(commitCommand)
         }
         
         return commands
