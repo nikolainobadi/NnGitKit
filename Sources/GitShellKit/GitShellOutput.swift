@@ -23,6 +23,15 @@ internal enum GitShellOutput {
             .contains("origin")
     }
     
+    /// Parses the output of `git remote` into a list of remote names.
+    static func parseRemotes(_ output: String) -> [String] {
+        output
+            .split(separator: "\n")
+            .map(String.init)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+    
     /// Normalizes various Git remote URL formats into a GitHub HTTPS URL.
     ///
     /// Supported inputs:

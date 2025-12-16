@@ -61,6 +61,33 @@ public extension GitShell {
     func runGitCommandWithOutput(_ command: GitShellCommand, path: String?) throws -> String {
         return try runWithOutput(makeGitCommand(command, path: path))
     }
+    
+    /// Inspects repository state in a read-only manner.
+    ///
+    /// - Parameter path: The path to the repository.
+    /// - Returns: A `RepoState` snapshot with basic repo details.
+    func inspectRepoState(at path: String?) throws -> RepoState {
+        let hasLocalGit: Bool
+        
+        do {
+            hasLocalGit = try localGitExists(at: path)
+        } catch {
+            hasLocalGit = false
+        }
+        
+        guard hasLocalGit else {
+            return RepoState(hasLocalGit: false, hasRemote: false, currentBranch: "", remotes: [])
+        }
+        
+        let remoteOutput = try runWithOutput(makeGitCommand(.checkForRemote, path: path))
+        let remotes = GitShellOutput.parseRemotes(remoteOutput)
+        let hasRemote = GitShellOutput.containsOriginRemote(remoteOutput)
+        
+        let currentBranch = try runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        return .init(hasLocalGit: hasLocalGit, hasRemote: hasRemote, currentBranch: currentBranch, remotes: remotes)
+    }
 }
 
 
