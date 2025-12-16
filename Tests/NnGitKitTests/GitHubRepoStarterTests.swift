@@ -31,7 +31,7 @@ extension GitHubRepoStarterTests {
     @Test("Successfully initializes a new GitHub repository when local git exists, remote does not exist, and NOT on main branch BUT can upload to non-main branch", arguments: RepoVisibility.allCases)
     func repoInitSuccessNonMainBranch(visibility: RepoVisibility) throws {
         let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "feature", githubURL: defaultURL)
-        let (sut, shell) = makeSUT(visibility: visibility, canUploadNonMainBranch: true, runResults: runResults)
+        let (sut, shell) = makeSUT(visibility: visibility, branchPolicy: .allowNonMain, runResults: runResults)
         let result = try sut.repoInit()
         
         #expect(result == defaultURL)
@@ -91,9 +91,9 @@ extension GitHubRepoStarterTests {
 
 // MARK: - SUT
 private extension GitHubRepoStarterTests {
-    func makeSUT(visibility: RepoVisibility = .publicRepo, canUploadNonMainBranch: Bool = false, path: String? = nil, runResults: [String] = [], throwError: Bool = false) -> (sut: GitHubRepoStarter, shell: MockShell) {
+    func makeSUT(visibility: RepoVisibility = .publicRepo, branchPolicy: BranchPolicy = .mainOnly, path: String? = nil, runResults: [String] = [], throwError: Bool = false) -> (sut: GitHubRepoStarter, shell: MockShell) {
         let shell = MockShell(runResults: runResults, throwError: throwError)
-        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, canUploadFromNonMainBranch: canUploadNonMainBranch)
+        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, branchPolicy: branchPolicy)
         let sut = GitHubRepoStarter(path: path ?? defaultPath, shell: shell, repoInfo: info)
         
         return (sut, shell)

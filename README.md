@@ -101,7 +101,7 @@ do {
 ### Creating a GitHub Repository
 
 ```swift
-let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, canUploadFromNonMainBranch: false)
+let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, branchPolicy: .mainOnly)
 let repoStarter = GitHubRepoStarter(path: "/path/to/project", shell: YourShellImplementation(), repoInfo: info)
 
 do {

@@ -69,7 +69,7 @@ public extension GitHubRepoStarter {
 
         let currentBranchName = try shell.runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
 
-        if currentBranchName != "main", !repoInfo.canUploadFromNonMainBranch {
+        if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName) {
             throw GitShellError.currentBranchIsNotMainBranch
         }
         
@@ -87,16 +87,33 @@ public enum RepoVisibility: String, CaseIterable, Sendable {
     case privateRepo = "private"
 }
 
+/// Branch upload policy for initializing the GitHub repository.
+public enum BranchPolicy: Sendable {
+    /// Only allow uploads from the main branch.
+    case mainOnly
+    /// Allow uploads from any branch (including non-main).
+    case allowNonMain
+    
+    func allowsUpload(from branchName: String) -> Bool {
+        switch self {
+        case .mainOnly:
+            return branchName == "main"
+        case .allowNonMain:
+            return true
+        }
+    }
+}
+
 public struct RepoInfo {
     public let name: String
     public let details: String
     public let visibility: RepoVisibility
-    public let canUploadFromNonMainBranch: Bool
+    public let branchPolicy: BranchPolicy
     
-    public init(name: String, details: String, visibility: RepoVisibility, canUploadFromNonMainBranch: Bool) {
+    public init(name: String, details: String, visibility: RepoVisibility, branchPolicy: BranchPolicy) {
         self.name = name
         self.details = details
         self.visibility = visibility
-        self.canUploadFromNonMainBranch = canUploadFromNonMainBranch
+        self.branchPolicy = branchPolicy
     }
 }
