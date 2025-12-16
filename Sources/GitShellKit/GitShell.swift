@@ -62,6 +62,41 @@ public extension GitShell {
         return try runWithOutput(makeGitCommand(command, path: path))
     }
     
+    /// Resolves the default branch, preferring the origin remote when available.
+    ///
+    /// - Parameter path: The path to the repository.
+    /// - Returns: The resolved default branch name.
+    /// - Throws: `GitShellError.missingLocalGit` if the directory is not a Git repository.
+    func getDefaultBranch(at path: String?) throws -> String {
+        guard try localGitExists(at: path) else {
+            throw GitShellError.missingLocalGit
+        }
+        
+        if let remoteDefaultBranch = try remoteDefaultBranch(at: path) {
+            return remoteDefaultBranch
+        }
+        
+        if let configBranch = try? runWithOutput(makeGitCommand(.getInitDefaultBranch, path: path))
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+           !configBranch.isEmpty {
+            return configBranch
+        }
+        
+        return "main"
+    }
+    
+    /// Attempts to read the origin default branch without throwing on failure.
+    private func remoteDefaultBranch(at path: String?) throws -> String? {
+        guard (try? remoteExists(path: path)) == true else { return nil }
+        
+        do {
+            let output = try runWithOutput(makeGitCommand(.getRemoteDefaultBranch, path: path))
+            return GitShellOutput.parseRemoteDefaultBranch(output)
+        } catch {
+            return nil
+        }
+    }
+    
     /// Inspects repository state in a read-only manner.
     ///
     /// - Parameter path: The path to the repository.

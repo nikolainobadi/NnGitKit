@@ -60,7 +60,9 @@ public extension GitHubRepoStarter {
             .runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName, defaultBranch: repoInfo.defaultBranch) {
+        let defaultBranch = try shell.getDefaultBranch(at: path)
+        
+        if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName, defaultBranch: defaultBranch) {
             throw GitShellError.currentBranchIsNotMainBranch
         }
         

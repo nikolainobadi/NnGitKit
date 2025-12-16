@@ -32,6 +32,15 @@ internal enum GitShellOutput {
             .filter { !$0.isEmpty }
     }
     
+    /// Parses the output of `git symbolic-ref refs/remotes/origin/HEAD` to extract the default branch.
+    static func parseRemoteDefaultBranch(_ output: String) -> String? {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.hasPrefix("refs/remotes/origin/") else { return nil }
+        
+        let branch = String(trimmed.dropFirst("refs/remotes/origin/".count))
+        return branch.isEmpty ? nil : branch
+    }
+    
     /// Normalizes various Git remote URL formats into a GitHub HTTPS URL.
     ///
     /// Supported inputs:

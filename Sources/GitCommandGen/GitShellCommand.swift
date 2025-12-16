@@ -94,6 +94,12 @@ public enum GitShellCommand {
     /// - Parameter branch: The name of the branch.
     case getBranchCreationDate(branchName: String)
     
+    /// Retrieves the default branch from the origin remote.
+    case getRemoteDefaultBranch
+    
+    /// Retrieves the configured default branch for new repos.
+    case getInitDefaultBranch
+    
     /// Deletes the specified branch.
     ///
     /// - Parameters:
@@ -156,6 +162,10 @@ extension GitShellCommand {
             return "push -u origin \(branchName)"
         case .addGitHubRemote(let username, let projectName):
             return "remote add origin https://github.com/\(username)/\(projectName).git"
+        case .getRemoteDefaultBranch:
+            return "symbolic-ref refs/remotes/origin/HEAD"
+        case .getInitDefaultBranch:
+            return "config --get init.defaultBranch"
             
         // Branches
         case .newBranch(let name):

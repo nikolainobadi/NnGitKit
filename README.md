@@ -82,6 +82,13 @@ do {
 
 ```
 
+To resolve the default branch configured for a repository path:
+
+```swift
+let defaultBranch = try shell.getDefaultBranch(at: "/path/to/project")
+print("Default branch: \(defaultBranch)")
+```
+
 ### Initializing a Git Repository
 
 ```swift 
