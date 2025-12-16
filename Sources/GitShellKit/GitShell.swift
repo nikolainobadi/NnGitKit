@@ -36,7 +36,8 @@ public extension GitShell {
     /// - Returns: `true` if a Git repository exists, `false` otherwise.
     /// - Throws: An error if the command fails.
     func localGitExists(at path: String?) throws -> Bool {
-        return try runWithOutput(makeGitCommand(.localGitCheck, path: path)) == "true"
+        let output = try runWithOutput(makeGitCommand(.localGitCheck, path: path))
+        return GitShellOutput.isTrue(output)
     }
 
     /// Checks whether a remote origin exists for the repository.
@@ -46,8 +47,7 @@ public extension GitShell {
     /// - Throws: An error if the command fails.
     func remoteExists(path: String?) throws -> Bool {
         let output = try runWithOutput(makeGitCommand(.checkForRemote, path: path))
-        let remotes = output.split(separator: "\n").map(String.init)
-        return remotes.contains("origin")
+        return GitShellOutput.containsOriginRemote(output)
     }
     
     /// Runs a Git command and returns the resulting output string.
