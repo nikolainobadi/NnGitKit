@@ -47,11 +47,7 @@ public extension GitHubRepoStarter {
     func repoInit() throws -> GitHubURL {
         _ = try validateRepoInit()
 
-        try shell.runWithOutput(
-            makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
-        )
-
-        return try shell.getGitHubURL(at: path)
+        return try createRemoteRepoAndFetchURL()
     }
     
     /// Validates that the repository is ready for initialization on GitHub.
@@ -74,6 +70,18 @@ public extension GitHubRepoStarter {
         }
         
         return RepoInitValidation(currentBranchName: currentBranchName)
+    }
+    
+    /// Executes the side-effectful steps to create the GitHub remote and fetch its URL.
+    ///
+    /// - Returns: The GitHub URL for the newly created remote.
+    /// - Throws: An error if any command fails.
+    func createRemoteRepoAndFetchURL() throws -> GitHubURL {
+        try shell.runWithOutput(
+            makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
+        )
+        
+        return try shell.getGitHubURL(at: path)
     }
 }
 
