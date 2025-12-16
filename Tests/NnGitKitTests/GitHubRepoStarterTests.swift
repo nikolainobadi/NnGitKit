@@ -67,6 +67,29 @@ extension GitHubRepoStarterTests {
         }
     }
     
+    @Test("Uses configured default branch when main-only policy is enforced")
+    func repoInitHonorsCustomDefaultBranch() throws {
+        let defaultBranch = "develop"
+        let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: defaultBranch, githubURL: defaultURL)
+        let (sut, shell) = makeSUT(branchPolicy: .mainOnly, defaultBranch: defaultBranch, runResults: runResults)
+        
+        let result = try sut.repoInit()
+        
+        #expect(result == defaultURL)
+        assertShellCommands(shell: shell)
+    }
+    
+    @Test("Fails when branch differs from configured default under main-only policy")
+    func repoInitFailsWhenBranchNotDefault() throws {
+        let defaultBranch = "develop"
+        let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "feature", githubURL: defaultURL)
+        let sut = makeSUT(branchPolicy: .mainOnly, defaultBranch: defaultBranch, runResults: runResults).sut
+        
+        #expect(throws: GitShellError.currentBranchIsNotMainBranch) {
+            try sut.repoInit()
+        }
+    }
+    
     @Test("Validation succeeds when repo is ready for init")
     func validateRepoInitSuccess() throws {
         let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "main")
@@ -113,9 +136,9 @@ extension GitHubRepoStarterTests {
 
 // MARK: - SUT
 private extension GitHubRepoStarterTests {
-    func makeSUT(visibility: RepoVisibility = .publicRepo, branchPolicy: BranchPolicy = .mainOnly, path: String? = nil, runResults: [String] = [], throwError: Bool = false, errorIndices: Set<Int> = []) -> (sut: GitHubRepoStarter, shell: MockShell) {
+    func makeSUT(visibility: RepoVisibility = .publicRepo, branchPolicy: BranchPolicy = .mainOnly, defaultBranch: String = "main", path: String? = nil, runResults: [String] = [], throwError: Bool = false, errorIndices: Set<Int> = []) -> (sut: GitHubRepoStarter, shell: MockShell) {
         let shell = MockShell(runResults: runResults, throwError: throwError, errorIndices: errorIndices)
-        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, branchPolicy: branchPolicy)
+        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, branchPolicy: branchPolicy, defaultBranch: defaultBranch)
         let sut = GitHubRepoStarter(path: path ?? defaultPath, shell: shell, repoInfo: info)
         
         return (sut, shell)

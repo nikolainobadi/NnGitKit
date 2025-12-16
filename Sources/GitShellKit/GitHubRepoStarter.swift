@@ -69,7 +69,7 @@ public extension GitHubRepoStarter {
             .runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName) {
+        if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName, defaultBranch: repoInfo.defaultBranch) {
             throw GitShellError.currentBranchIsNotMainBranch
         }
         
@@ -123,10 +123,10 @@ public enum BranchPolicy: Sendable {
     /// Allow uploads from any branch (including non-main).
     case allowNonMain
     
-    func allowsUpload(from branchName: String) -> Bool {
+    func allowsUpload(from branchName: String, defaultBranch: String) -> Bool {
         switch self {
         case .mainOnly:
-            return branchName == "main"
+            return branchName == defaultBranch
         case .allowNonMain:
             return true
         }
@@ -138,11 +138,13 @@ public struct RepoInfo {
     public let details: String
     public let visibility: RepoVisibility
     public let branchPolicy: BranchPolicy
+    public let defaultBranch: String
     
-    public init(name: String, details: String, visibility: RepoVisibility, branchPolicy: BranchPolicy) {
+    public init(name: String, details: String, visibility: RepoVisibility, branchPolicy: BranchPolicy, defaultBranch: String = "main") {
         self.name = name
         self.details = details
         self.visibility = visibility
         self.branchPolicy = branchPolicy
+        self.defaultBranch = defaultBranch
     }
 }
