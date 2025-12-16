@@ -89,6 +89,14 @@ let defaultBranch = try shell.getDefaultBranch(at: "/path/to/project")
 print("Default branch: \(defaultBranch)")
 ```
 
+You can also plan commands without executing them using `ExecutionMode.dryRun`:
+
+```swift
+let gitStarter = GitStarter(path: "/path/to/project", shell: YourShellImplementation())
+let planned = try gitStarter.gitInit(mode: .dryRun)
+print(planned) // ["git -C \"/path/to/project\" rev-parse --is-inside-work-tree", ...]
+```
+
 ### Initializing a Git Repository
 
 ```swift 

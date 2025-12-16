@@ -68,33 +68,60 @@ public extension GitShell {
     /// - Returns: The resolved default branch name.
     /// - Throws: `GitShellError.missingLocalGit` if the directory is not a Git repository.
     func getDefaultBranch(at path: String?) throws -> String {
-        guard try localGitExists(at: path) else {
-            throw GitShellError.missingLocalGit
+        var commands: [String] = []
+        return try getDefaultBranch(at: path, mode: .execute, commands: &commands)
+    }
+    
+    /// Resolves the default branch using the provided execution mode, recording commands.
+    ///
+    /// - Parameters:
+    ///   - path: The path to the repository.
+    ///   - mode: Whether to execute or only plan commands.
+    ///   - commands: A log of the commands that were executed or planned.
+    /// - Returns: The resolved default branch name.
+    /// - Throws: `GitShellError.missingLocalGit` if the directory is not a Git repository.
+    func getDefaultBranch(at path: String?, mode: ExecutionMode, commands: inout [String]) throws -> String {
+        let localGitCommand = makeGitCommand(.localGitCheck, path: path)
+        commands.append(localGitCommand)
+        if mode == .execute {
+            let exists = GitShellOutput.isTrue(try runWithOutput(localGitCommand))
+            guard exists else { throw GitShellError.missingLocalGit }
         }
         
-        if let remoteDefaultBranch = try remoteDefaultBranch(at: path) {
-            return remoteDefaultBranch
+        let remoteCommand = makeGitCommand(.checkForRemote, path: path)
+        commands.append(remoteCommand)
+        let remoteOutput: String
+        if mode == .execute {
+            remoteOutput = try runWithOutput(remoteCommand)
+        } else {
+            remoteOutput = ""
+        }
+        let hasRemote = GitShellOutput.containsOriginRemote(remoteOutput)
+        
+        if hasRemote {
+            let remoteDefaultCommand = makeGitCommand(.getRemoteDefaultBranch, path: path)
+            commands.append(remoteDefaultCommand)
+            
+            if mode == .execute {
+                if let remoteDefault = GitShellOutput.parseRemoteDefaultBranch(try runWithOutput(remoteDefaultCommand)) {
+                    return remoteDefault
+                }
+            }
         }
         
-        if let configBranch = try? runWithOutput(makeGitCommand(.getInitDefaultBranch, path: path))
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-           !configBranch.isEmpty {
-            return configBranch
+        let defaultBranchCommand = makeGitCommand(.getInitDefaultBranch, path: path)
+        commands.append(defaultBranchCommand)
+        
+        if mode == .execute {
+            let configBranch = try runWithOutput(defaultBranchCommand)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if !configBranch.isEmpty {
+                return configBranch
+            }
         }
         
         return "main"
-    }
-    
-    /// Attempts to read the origin default branch without throwing on failure.
-    private func remoteDefaultBranch(at path: String?) throws -> String? {
-        guard (try? remoteExists(path: path)) == true else { return nil }
-        
-        do {
-            let output = try runWithOutput(makeGitCommand(.getRemoteDefaultBranch, path: path))
-            return GitShellOutput.parseRemoteDefaultBranch(output)
-        } catch {
-            return nil
-        }
     }
     
     /// Inspects repository state in a read-only manner.

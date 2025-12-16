@@ -13,6 +13,17 @@ public struct GitHubRepoStarter {
     private let path: String?
     private let shell: GitShell
     private let repoInfo: RepoInfo
+    
+    /// The result of a repository initialization, including planned or executed commands.
+    public struct RepoInitResult {
+        public let url: GitHubURL?
+        public let commands: [String]
+        
+        public init(url: GitHubURL?, commands: [String]) {
+            self.url = url
+            self.commands = commands
+        }
+    }
 
     /// Initializes a `GitHubRepoStarter` with the given path, shell, and repoInfo.
     ///
@@ -36,9 +47,49 @@ public extension GitHubRepoStarter {
     /// - Throws: An error if the repository cannot be created or initialized.
     @discardableResult
     func repoInit() throws -> GitHubURL {
-        _ = try validateRepoInit()
+        let result = try repoInit(mode: .execute)
+        guard let url = result.url else {
+            throw GitShellError.remoteCreatedFollowupFailed
+        }
+        return url
+    }
+    
+    /// Initializes a new GitHub repository and returns the result along with planned commands.
+    ///
+    /// - Parameter mode: Whether to execute commands or only plan them.
+    /// - Returns: The GitHub URL (when executed) and the commands in order.
+    /// - Throws: An error if initialization fails in execute mode.
+    @discardableResult
+    func repoInit(mode: ExecutionMode) throws -> RepoInitResult {
+        var commands: [String] = []
+        _ = try validateRepoInit(mode: mode, commands: &commands)
 
-        return try createRemoteRepoAndGetURL()
+        var remoteCreated = false
+        
+        do {
+            let createCommand = makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
+            commands.append(createCommand)
+            
+            if mode == .execute {
+                try shell.runWithOutput(createCommand)
+                remoteCreated = true
+            }
+            
+            let urlCommand = makeGitCommand(.getRemoteURL, path: path)
+            commands.append(urlCommand)
+            
+            if mode == .execute {
+                let url = try shell.getGitHubURL(at: path)
+                return RepoInitResult(url: url, commands: commands)
+            }
+            
+            return RepoInitResult(url: nil, commands: commands)
+        } catch {
+            if remoteCreated {
+                throw GitShellError.remoteCreatedFollowupFailed
+            }
+            throw error
+        }
     }
     
     /// Validates that the repository is ready for initialization on GitHub.
@@ -46,23 +97,68 @@ public extension GitHubRepoStarter {
     /// - Returns: The validation details including the current branch name.
     /// - Throws: `GitShellError` if validation fails.
     func validateRepoInit() throws -> RepoInitValidation {
-        try validateGitHubCLI()
+        var commands: [String] = []
+        return try validateRepoInit(mode: .execute, commands: &commands)
+    }
+    
+    /// Validates that the repository is ready for initialization on GitHub using the provided execution mode.
+    ///
+    /// - Parameters:
+    ///   - mode: Whether to execute commands or only plan them.
+    ///   - commands: A log of the commands that were executed or planned.
+    /// - Returns: The validation details including the current branch name.
+    /// - Throws: `GitShellError` if validation fails in execute mode.
+    func validateRepoInit(mode: ExecutionMode, commands: inout [String]) throws -> RepoInitValidation {
+        let versionCommand = makeGitHubCommand(.version, path: path)
+        commands.append(versionCommand)
+        if mode == .execute {
+            do {
+                _ = try shell.runWithOutput(versionCommand)
+            } catch {
+                throw GitShellError.githubCLINotAvailable
+            }
+        }
         
-        guard try shell.localGitExists(at: path) else {
-            throw GitShellError.missingLocalGit
+        let authCommand = makeGitHubCommand(.authStatus, path: path)
+        commands.append(authCommand)
+        if mode == .execute {
+            do {
+                _ = try shell.runWithOutput(authCommand)
+            } catch {
+                throw GitShellError.githubCLINotAuthenticated
+            }
+        }
+        
+        let localGitCommand = makeGitCommand(.localGitCheck, path: path)
+        commands.append(localGitCommand)
+        if mode == .execute {
+            let hasLocalGit = GitShellOutput.isTrue(try shell.runWithOutput(localGitCommand))
+            guard hasLocalGit else { throw GitShellError.missingLocalGit }
         }
 
-        if try shell.remoteExists(path: path) {
-            throw GitShellError.remoteRepoAlreadyExists
+        let remoteCommand = makeGitCommand(.checkForRemote, path: path)
+        commands.append(remoteCommand)
+        if mode == .execute {
+            let remoteOutput = try shell.runWithOutput(remoteCommand)
+            if GitShellOutput.containsOriginRemote(remoteOutput) {
+                throw GitShellError.remoteRepoAlreadyExists
+            }
         }
 
-        let currentBranchName = try shell
-            .runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentBranchCommand = makeGitCommand(.getCurrentBranchName, path: path)
+        commands.append(currentBranchCommand)
+        let currentBranchName: String
+        if mode == .execute {
+            currentBranchName = try shell
+                .runWithOutput(currentBranchCommand)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            currentBranchName = repoInfo.defaultBranch
+        }
 
-        let defaultBranch = try shell.getDefaultBranch(at: path)
+        let defaultBranch = try shell.getDefaultBranch(at: path, mode: mode, commands: &commands)
         
-        if !repoInfo.branchPolicy.allowsUpload(from: currentBranchName, defaultBranch: defaultBranch) {
+        if mode == .execute && !repoInfo.branchPolicy.allowsUpload(from: currentBranchName, defaultBranch: defaultBranch) {
             throw GitShellError.currentBranchIsNotMainBranch
         }
         

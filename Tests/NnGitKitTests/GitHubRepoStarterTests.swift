@@ -111,6 +111,27 @@ extension GitHubRepoStarterTests {
         }
     }
     
+    @Test("Returns plan without executing when running repo init in dry-run mode")
+    func repoInitDryRunReturnsPlannedCommands() throws {
+        let (sut, shell) = makeSUT()
+        
+        let result = try sut.repoInit(mode: .dryRun)
+        
+        #expect(result.url == nil)
+        #expect(result.commands.count == 10)
+        #expect(result.commands[0] == makeGitHubCommand(.version, path: defaultPath))
+        #expect(result.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
+        #expect(result.commands[2] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(result.commands[3] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(result.commands[4] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
+        #expect(result.commands[5] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(result.commands[6] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(result.commands[7] == makeGitCommand(.getInitDefaultBranch, path: defaultPath))
+        #expect(result.commands[8] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: RepoVisibility.publicRepo.rawValue, details: projectDetails), path: defaultPath))
+        #expect(result.commands[9] == makeGitCommand(.getRemoteURL, path: defaultPath))
+        #expect(shell.commands.isEmpty)
+    }
+    
     @Test("Throws when GitHub CLI is not available")
     func repoInitThrowsIfGhMissing() throws {
         let (sut, shell) = makeSUT(runResults: makeRunResults(), errorIndices: [0])
@@ -132,7 +153,7 @@ extension GitHubRepoStarterTests {
         #expect(shell.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
     }
     
-    @Test("Throws partial success error when remote creation succeeds but fetching URL fails", .disabled()) // TODO: -
+    @Test("Throws partial success error when remote creation succeeds but fetching URL fails")
     func repoInitThrowsOnPartialSuccess() throws {
         // Fail after gh repo create (command index 8) when attempting to get remote URL
         let (sut, shell) = makeSUT(runResults: makeRunResults(), errorIndices: [9])
