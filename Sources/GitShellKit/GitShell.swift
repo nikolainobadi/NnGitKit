@@ -70,9 +70,6 @@ public extension String {
     ///
     /// - Returns: A formatted HTTPS URL for the GitHub repository.
     func toGitHubURL() -> String {
-        return self
-            .replacingOccurrences(of: "com:", with: "com/")
-            .replacingOccurrences(of: "git@", with: "https://")
-            .replacingOccurrences(of: ".git", with: "")
+        return GitShellOutput.normalizeGitHubURL(self)
     }
 }
