@@ -49,7 +49,7 @@ public extension GitStarter {
         let localGitCheck = makeGitCommand(.localGitCheck, path: path)
         commands.append(localGitCheck)
         if mode == .execute {
-            let exists = GitShellOutput.isTrue(try shell.runWithOutput(localGitCheck))
+            let exists = GitShellOutput.isTrue(try shell.runWithOutputWrappingFailure(localGitCheck))
             if exists && !ignoreErrors {
                 throw GitShellError.localGitAlreadyExists
             }
@@ -58,19 +58,19 @@ public extension GitStarter {
         let initCommand = makeGitCommand(.gitInit, path: path)
         commands.append(initCommand)
         if mode == .execute {
-            try shell.runWithOutput(initCommand)
+            try shell.runWithOutputWrappingFailure(initCommand)
         }
         
         let addCommand = makeGitCommand(.addAll, path: path)
         commands.append(addCommand)
         if mode == .execute {
-            try shell.runWithOutput(addCommand)
+            try shell.runWithOutputWrappingFailure(addCommand)
         }
         
         let commitCommand = makeGitCommand(.commit(message: "Initial Commit"), path: path)
         commands.append(commitCommand)
         if mode == .execute {
-            try shell.runWithOutput(commitCommand)
+            try shell.runWithOutputWrappingFailure(commitCommand)
         }
         
         return commands

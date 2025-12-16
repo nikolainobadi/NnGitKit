@@ -97,6 +97,8 @@ let planned = try gitStarter.gitInit(mode: .dryRun)
 print(planned) // ["git -C \"/path/to/project\" rev-parse --is-inside-work-tree", ...]
 ```
 
+When a command fails, `GitCommandFailure` includes the command string and any available output to aid diagnostics.
+
 ### Initializing a Git Repository
 
 ```swift 

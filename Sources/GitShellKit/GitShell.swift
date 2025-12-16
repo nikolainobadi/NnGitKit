@@ -5,6 +5,7 @@
 //  Created by Nikolai Nobadi on 3/21/25.
 //
 
+import Foundation
 import GitCommandGen
 
 /// A protocol defining a shell interface for running Git commands.
@@ -27,7 +28,7 @@ public extension GitShell {
     /// - Returns: The GitHub URL of the repository.
     /// - Throws: An error if the command fails.
     func getGitHubURL(at path: String?) throws -> String {
-        return try runWithOutput(makeGitCommand(.getRemoteURL, path: path)).toGitHubURL()
+        return try runWithOutputWrappingFailure(makeGitCommand(.getRemoteURL, path: path)).toGitHubURL()
     }
 
     /// Checks whether a local Git repository exists at the specified path.
@@ -36,7 +37,7 @@ public extension GitShell {
     /// - Returns: `true` if a Git repository exists, `false` otherwise.
     /// - Throws: An error if the command fails.
     func localGitExists(at path: String?) throws -> Bool {
-        let output = try runWithOutput(makeGitCommand(.localGitCheck, path: path))
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.localGitCheck, path: path))
         return GitShellOutput.isTrue(output)
     }
 
@@ -46,7 +47,7 @@ public extension GitShell {
     /// - Returns: `true` if the remote exists, `false` otherwise.
     /// - Throws: An error if the command fails.
     func remoteExists(path: String?) throws -> Bool {
-        let output = try runWithOutput(makeGitCommand(.checkForRemote, path: path))
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.checkForRemote, path: path))
         return GitShellOutput.containsOriginRemote(output)
     }
     
@@ -59,7 +60,7 @@ public extension GitShell {
     /// - Throws: An error if the command execution fails.
     @discardableResult
     func runGitCommandWithOutput(_ command: GitShellCommand, path: String?) throws -> String {
-        return try runWithOutput(makeGitCommand(command, path: path))
+        return try runWithOutputWrappingFailure(makeGitCommand(command, path: path))
     }
     
     /// Resolves the default branch, preferring the origin remote when available.
@@ -84,7 +85,7 @@ public extension GitShell {
         let localGitCommand = makeGitCommand(.localGitCheck, path: path)
         commands.append(localGitCommand)
         if mode == .execute {
-            let exists = GitShellOutput.isTrue(try runWithOutput(localGitCommand))
+            let exists = GitShellOutput.isTrue(try runWithOutputWrappingFailure(localGitCommand))
             guard exists else { throw GitShellError.missingLocalGit }
         }
         
@@ -92,7 +93,7 @@ public extension GitShell {
         commands.append(remoteCommand)
         let remoteOutput: String
         if mode == .execute {
-            remoteOutput = try runWithOutput(remoteCommand)
+            remoteOutput = try runWithOutputWrappingFailure(remoteCommand)
         } else {
             remoteOutput = ""
         }
@@ -103,7 +104,7 @@ public extension GitShell {
             commands.append(remoteDefaultCommand)
             
             if mode == .execute {
-                if let remoteDefault = GitShellOutput.parseRemoteDefaultBranch(try runWithOutput(remoteDefaultCommand)) {
+                if let remoteDefault = GitShellOutput.parseRemoteDefaultBranch(try runWithOutputWrappingFailure(remoteDefaultCommand)) {
                     return remoteDefault
                 }
             }
@@ -113,7 +114,7 @@ public extension GitShell {
         commands.append(defaultBranchCommand)
         
         if mode == .execute {
-            let configBranch = try runWithOutput(defaultBranchCommand)
+            let configBranch = try runWithOutputWrappingFailure(defaultBranchCommand)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             
             if !configBranch.isEmpty {
@@ -141,24 +142,28 @@ public extension GitShell {
             return RepoState(hasLocalGit: false, hasRemote: false, currentBranch: "", remotes: [])
         }
         
-        let remoteOutput = try runWithOutput(makeGitCommand(.checkForRemote, path: path))
+        let remoteOutput = try runWithOutputWrappingFailure(makeGitCommand(.checkForRemote, path: path))
         let remotes = GitShellOutput.parseRemotes(remoteOutput)
         let hasRemote = GitShellOutput.containsOriginRemote(remoteOutput)
         
-        let currentBranch = try runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
+        let currentBranch = try runWithOutputWrappingFailure(makeGitCommand(.getCurrentBranchName, path: path))
             .trimmingCharacters(in: .whitespacesAndNewlines)
         
         return .init(hasLocalGit: hasLocalGit, hasRemote: hasRemote, currentBranch: currentBranch, remotes: remotes)
     }
-}
-
-
-// MARK: - Extension Dependencies
-public extension String {
-    /// Converts a Git SSH URL to an HTTPS URL.
-    ///
-    /// - Returns: A formatted HTTPS URL for the GitHub repository.
-    func toGitHubURL() -> String {
-        return GitShellOutput.normalizeGitHubURL(self)
+    
+    /// Runs a command and wraps failures with contextual details.
+    func runWithOutputWrappingFailure(_ command: String) throws -> String {
+        do {
+            return try runWithOutput(command)
+        } catch {
+            if let failure = error as? GitCommandFailure {
+                throw failure
+            }
+            
+            let nsError = error as NSError
+            let output = (nsError.userInfo[NSLocalizedFailureReasonErrorKey] as? String ?? nsError.localizedDescription)
+            throw GitCommandFailure(command: command, output: output)
+        }
     }
 }

@@ -71,7 +71,7 @@ public extension GitHubRepoStarter {
             commands.append(createCommand)
             
             if mode == .execute {
-                try shell.runWithOutput(createCommand)
+                try shell.runWithOutputWrappingFailure(createCommand)
                 remoteCreated = true
             }
             
@@ -113,7 +113,7 @@ public extension GitHubRepoStarter {
         commands.append(versionCommand)
         if mode == .execute {
             do {
-                _ = try shell.runWithOutput(versionCommand)
+                _ = try shell.runWithOutputWrappingFailure(versionCommand)
             } catch {
                 throw GitShellError.githubCLINotAvailable
             }
@@ -123,7 +123,7 @@ public extension GitHubRepoStarter {
         commands.append(authCommand)
         if mode == .execute {
             do {
-                _ = try shell.runWithOutput(authCommand)
+                _ = try shell.runWithOutputWrappingFailure(authCommand)
             } catch {
                 throw GitShellError.githubCLINotAuthenticated
             }
@@ -132,14 +132,14 @@ public extension GitHubRepoStarter {
         let localGitCommand = makeGitCommand(.localGitCheck, path: path)
         commands.append(localGitCommand)
         if mode == .execute {
-            let hasLocalGit = GitShellOutput.isTrue(try shell.runWithOutput(localGitCommand))
+            let hasLocalGit = GitShellOutput.isTrue(try shell.runWithOutputWrappingFailure(localGitCommand))
             guard hasLocalGit else { throw GitShellError.missingLocalGit }
         }
 
         let remoteCommand = makeGitCommand(.checkForRemote, path: path)
         commands.append(remoteCommand)
         if mode == .execute {
-            let remoteOutput = try shell.runWithOutput(remoteCommand)
+            let remoteOutput = try shell.runWithOutputWrappingFailure(remoteCommand)
             if GitShellOutput.containsOriginRemote(remoteOutput) {
                 throw GitShellError.remoteRepoAlreadyExists
             }
@@ -150,7 +150,7 @@ public extension GitHubRepoStarter {
         let currentBranchName: String
         if mode == .execute {
             currentBranchName = try shell
-                .runWithOutput(currentBranchCommand)
+                .runWithOutputWrappingFailure(currentBranchCommand)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
         } else {
             currentBranchName = repoInfo.defaultBranch
@@ -173,7 +173,7 @@ public extension GitHubRepoStarter {
         var remoteCreated = false
         
         do {
-            try shell.runWithOutput(
+            try shell.runWithOutputWrappingFailure(
                 makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
             )
             remoteCreated = true
@@ -192,13 +192,13 @@ public extension GitHubRepoStarter {
     /// - Throws: `GitShellError.githubCLINotAvailable` or `GitShellError.githubCLINotAuthenticated`.
     func validateGitHubCLI() throws {
         do {
-            _ = try shell.runWithOutput(makeGitHubCommand(.version, path: path))
+            _ = try shell.runWithOutputWrappingFailure(makeGitHubCommand(.version, path: path))
         } catch {
             throw GitShellError.githubCLINotAvailable
         }
         
         do {
-            _ = try shell.runWithOutput(makeGitHubCommand(.authStatus, path: path))
+            _ = try shell.runWithOutputWrappingFailure(makeGitHubCommand(.authStatus, path: path))
         } catch {
             throw GitShellError.githubCLINotAuthenticated
         }

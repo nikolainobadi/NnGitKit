@@ -55,6 +55,23 @@ extension GitStarterTests {
         #expect(commands[3] == makeGitCommand(.commit(message: "Initial Commit"), path: defaultPath))
         #expect(shell.commands.isEmpty)
     }
+    
+    @Test("Wraps command failures with contextual GitCommandFailure")
+    func gitInitWrapsFailures() throws {
+        let sut = makeSUT(throwError: true).sut
+        
+        var captured: GitCommandFailure?
+        do {
+            try sut.gitInit()
+        } catch let failure as GitCommandFailure {
+            captured = failure
+        } catch {
+            #expect(Bool(false), "Unexpected error: \(error)")
+        }
+        
+        #expect(captured?.command == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(captured?.output == "error-0")
+    }
 }
 
 

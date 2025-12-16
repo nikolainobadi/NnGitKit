@@ -27,7 +27,7 @@ extension MockShell: GitShell {
     func runWithOutput(_ command: String) throws -> String {
         commands.append(command)
         if throwError || errorIndices.contains(commands.count - 1) {
-            throw NSError(domain: "Test", code: commands.count - 1)
+            throw GitCommandFailure(command: command, output: "error-\(commands.count - 1)")
         }
         
         
