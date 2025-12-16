@@ -131,6 +131,18 @@ extension GitHubRepoStarterTests {
         #expect(shell.commands[0] == makeGitHubCommand(.version, path: defaultPath))
         #expect(shell.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
     }
+    
+    @Test("Throws partial success error when remote creation succeeds but fetching URL fails")
+    func repoInitThrowsOnPartialSuccess() throws {
+        // Fail after gh repo create (command index 5) when attempting to get remote URL
+        let (sut, shell) = makeSUT(runResults: makeRunResults(), errorIndices: [6])
+        
+        #expect(throws: GitShellError.remoteCreatedFollowupFailed) {
+            try sut.repoInit()
+        }
+        #expect(shell.commands[5] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: RepoVisibility.publicRepo.rawValue, details: projectDetails), path: defaultPath))
+        #expect(shell.commands[6] == makeGitCommand(.getRemoteURL, path: defaultPath))
+    }
 }
 
 

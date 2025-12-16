@@ -19,4 +19,6 @@ public enum GitShellError: Error {
     case githubCLINotAvailable
     /// Indicates that the GitHub CLI is not authenticated.
     case githubCLINotAuthenticated
+    /// Indicates that the remote repository was created but a subsequent step failed.
+    case remoteCreatedFollowupFailed
 }

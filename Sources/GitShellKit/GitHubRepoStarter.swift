@@ -81,11 +81,21 @@ public extension GitHubRepoStarter {
     /// - Returns: The GitHub URL for the newly created remote.
     /// - Throws: An error if any command fails.
     func createRemoteRepoAndGetURL() throws -> GitHubURL {
-        try shell.runWithOutput(
-            makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
-        )
+        var remoteCreated = false
         
-        return try shell.getGitHubURL(at: path)
+        do {
+            try shell.runWithOutput(
+                makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
+            )
+            remoteCreated = true
+            
+            return try shell.getGitHubURL(at: path)
+        } catch {
+            if remoteCreated {
+                throw GitShellError.remoteCreatedFollowupFailed
+            }
+            throw error
+        }
     }
     
     /// Ensures the GitHub CLI is available and authenticated before attempting remote creation.
