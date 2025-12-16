@@ -41,4 +41,16 @@ struct GitShellOutputTests {
         #expect(!GitShellOutput.containsOriginRemote("origin-remote"))
         #expect(!GitShellOutput.containsOriginRemote(""))
     }
+    
+    @Test("Parses origin HEAD symbolic ref into branch name")
+    func parseRemoteDefaultBranchParsesOriginHead() {
+        #expect(GitShellOutput.parseRemoteDefaultBranch("refs/remotes/origin/main") == "main")
+        #expect(GitShellOutput.parseRemoteDefaultBranch("refs/remotes/origin/develop\n") == "develop")
+    }
+    
+    @Test("Returns nil for unexpected remote default branch output")
+    func parseRemoteDefaultBranchReturnsNilWhenUnrecognized() {
+        #expect(GitShellOutput.parseRemoteDefaultBranch("HEAD") == nil)
+        #expect(GitShellOutput.parseRemoteDefaultBranch("") == nil)
+    }
 }
