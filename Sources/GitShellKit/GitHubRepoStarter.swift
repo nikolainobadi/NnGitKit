@@ -27,16 +27,38 @@ public struct GitHubRepoStarter {
     }
 }
 
-// MARK: - Actions
+// MARK: - Types
 public extension GitHubRepoStarter {
     typealias GitHubURL = String
+    
+    /// Represents the validation state before initializing a GitHub repository.
+    struct RepoInitValidation {
+        public let currentBranchName: String
+    }
+}
 
+// MARK: - Actions
+public extension GitHubRepoStarter {
     /// Initializes a new GitHub repository and returns its URL.
     ///
     /// - Returns: The GitHub URL of the newly created repository.
     /// - Throws: An error if the repository cannot be created or initialized.
     @discardableResult
     func repoInit() throws -> GitHubURL {
+        _ = try validateRepoInit()
+
+        try shell.runWithOutput(
+            makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
+        )
+
+        return try shell.getGitHubURL(at: path)
+    }
+    
+    /// Validates that the repository is ready for initialization on GitHub.
+    ///
+    /// - Returns: The validation details including the current branch name.
+    /// - Throws: `GitShellError` if validation fails.
+    func validateRepoInit() throws -> RepoInitValidation {
         guard try shell.localGitExists(at: path) else {
             throw GitShellError.missingLocalGit
         }
@@ -47,17 +69,11 @@ public extension GitHubRepoStarter {
 
         let currentBranchName = try shell.runWithOutput(makeGitCommand(.getCurrentBranchName, path: path))
 
-        if currentBranchName != "main" {
-            if !repoInfo.canUploadFromNonMainBranch {
-                throw GitShellError.currentBranchIsNotMainBranch
-            }
+        if currentBranchName != "main", !repoInfo.canUploadFromNonMainBranch {
+            throw GitShellError.currentBranchIsNotMainBranch
         }
-
-        try shell.runWithOutput(
-            makeGitHubCommand(.createRemoteRepo(name: repoInfo.name, visibility: repoInfo.visibility.rawValue, details: repoInfo.details), path: path)
-        )
-
-        return try shell.getGitHubURL(at: path)
+        
+        return RepoInitValidation(currentBranchName: currentBranchName)
     }
 }
 

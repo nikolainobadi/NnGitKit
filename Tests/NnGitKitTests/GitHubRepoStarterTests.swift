@@ -65,6 +65,27 @@ extension GitHubRepoStarterTests {
             try sut.repoInit()
         }
     }
+    
+    @Test("Validation succeeds when repo is ready for init")
+    func validateRepoInitSuccess() throws {
+        let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "main")
+        let (sut, shell) = makeSUT(runResults: runResults)
+        
+        let result = try sut.validateRepoInit()
+        
+        #expect(result.currentBranchName == "main")
+        assertValidationCommands(shell: shell)
+    }
+    
+    @Test("Validation throws when remote exists")
+    func validateRepoInitThrowsIfRemoteExists() throws {
+        let runResults = makeRunResults(localExists: true, remoteExists: true)
+        let sut = makeSUT(runResults: runResults).sut
+        
+        #expect(throws: GitShellError.remoteRepoAlreadyExists) {
+            _ = try sut.validateRepoInit()
+        }
+    }
 }
 
 
@@ -99,5 +120,12 @@ private extension GitHubRepoStarterTests {
         #expect(shell.commands[2] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
         #expect(shell.commands[3] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: visibility.rawValue, details: projectDetails), path: defaultPath))
         #expect(shell.commands[4] == makeGitCommand(.getRemoteURL, path: defaultPath))
+    }
+    
+    func assertValidationCommands(shell: MockShell) {
+        #expect(shell.commands.count == 3)
+        #expect(shell.commands[0] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(shell.commands[1] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(shell.commands[2] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
     }
 }
