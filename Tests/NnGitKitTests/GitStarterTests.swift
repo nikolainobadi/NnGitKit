@@ -41,6 +41,37 @@ extension GitStarterTests {
         
         assertShellCommands(shell: shell)
     }
+    
+    @Test("Plans git init commands without executing them")
+    func gitInitDryRunReturnsPlannedCommands() throws {
+        let (sut, shell) = makeSUT()
+        
+        let commands = try sut.gitInit(mode: .dryRun)
+        
+        #expect(commands.count == 4)
+        #expect(commands[0] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(commands[1] == makeGitCommand(.gitInit, path: defaultPath))
+        #expect(commands[2] == makeGitCommand(.addAll, path: defaultPath))
+        #expect(commands[3] == makeGitCommand(.commit(message: "Initial Commit"), path: defaultPath))
+        #expect(shell.commands.isEmpty)
+    }
+    
+    @Test("Wraps command failures with contextual GitCommandFailure")
+    func gitInitWrapsFailures() throws {
+        let sut = makeSUT(throwError: true).sut
+        
+        var captured: GitCommandFailure?
+        do {
+            try sut.gitInit()
+        } catch let failure as GitCommandFailure {
+            captured = failure
+        } catch {
+            #expect(Bool(false), "Unexpected error: \(error)")
+        }
+        
+        #expect(captured?.command == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(captured?.output == "error-0")
+    }
 }
 
 

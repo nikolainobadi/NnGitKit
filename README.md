@@ -82,6 +82,23 @@ do {
 
 ```
 
+To resolve the default branch configured for a repository path:
+
+```swift
+let defaultBranch = try shell.getDefaultBranch(at: "/path/to/project")
+print("Default branch: \(defaultBranch)")
+```
+
+You can also plan commands without executing them using `ExecutionMode.dryRun`:
+
+```swift
+let gitStarter = GitStarter(path: "/path/to/project", shell: YourShellImplementation())
+let planned = try gitStarter.gitInit(mode: .dryRun)
+print(planned) // ["git -C \"/path/to/project\" rev-parse --is-inside-work-tree", ...]
+```
+
+When a command fails, `GitCommandFailure` includes the command string and any available output to aid diagnostics.
+
 ### Initializing a Git Repository
 
 ```swift 
@@ -101,7 +118,13 @@ do {
 ### Creating a GitHub Repository
 
 ```swift
-let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, canUploadFromNonMainBranch: false)
+let info = RepoInfo(
+    name: projectName,
+    details: projectDetails,
+    visibility: visibility,
+    branchPolicy: .mainOnly,
+    defaultBranch: "main" // customize if your repo uses a different default branch
+)
 let repoStarter = GitHubRepoStarter(path: "/path/to/project", shell: YourShellImplementation(), repoInfo: info)
 
 do {

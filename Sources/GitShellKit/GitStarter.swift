@@ -28,19 +28,51 @@ public struct GitStarter {
 
 // MARK: - Actions
 public extension GitStarter {
-
     /// Initializes a new Git repository at the specified path.
     ///
     /// If a Git repository already exists and `ignoreErrors` is `false`, an error will be thrown.
     ///
     /// - Throws: `GitShellError.localGitAlreadyExists` if a repository already exists.
     func gitInit() throws {
-        if try shell.localGitExists(at: path), !ignoreErrors {
-            throw GitShellError.localGitAlreadyExists
+        _ = try gitInit(mode: .execute)
+    }
+    
+    /// Initializes a new Git repository at the specified path using the requested execution mode.
+    ///
+    /// - Parameter mode: Whether to execute commands or return a planned sequence.
+    /// - Returns: The commands that were executed or planned.
+    /// - Throws: `GitShellError.localGitAlreadyExists` if a repository already exists.
+    @discardableResult
+    func gitInit(mode: ExecutionMode) throws -> [String] {
+        var commands: [String] = []
+        
+        let localGitCheck = makeGitCommand(.localGitCheck, path: path)
+        commands.append(localGitCheck)
+        if mode == .execute {
+            let exists = GitShellOutput.isTrue(try shell.runWithOutputWrappingFailure(localGitCheck))
+            if exists && !ignoreErrors {
+                throw GitShellError.localGitAlreadyExists
+            }
         }
 
-        try shell.runWithOutput(makeGitCommand(.gitInit, path: path))
-        try shell.runWithOutput(makeGitCommand(.addAll, path: path))
-        try shell.runWithOutput(makeGitCommand(.commit(message: "Initial Commit"), path: path))
+        let initCommand = makeGitCommand(.gitInit, path: path)
+        commands.append(initCommand)
+        if mode == .execute {
+            try shell.runAndPrint(initCommand)
+        }
+        
+        let addCommand = makeGitCommand(.addAll, path: path)
+        commands.append(addCommand)
+        if mode == .execute {
+            try shell.runAndPrint(addCommand)
+        }
+        
+        let commitCommand = makeGitCommand(.commit(message: "Initial Commit"), path: path)
+        commands.append(commitCommand)
+        if mode == .execute {
+            try shell.runAndPrint(commitCommand)
+        }
+        
+        return commands
     }
 }

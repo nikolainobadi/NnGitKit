@@ -30,12 +30,17 @@ public enum GitHubShellCommand {
     ///   - version: The version tag for the release.
     ///   - binaryPath: The path to the binary to include in the release.
     ///   - releaseNotes: The notes to include with the release.
-    case createNewReleaseWithBinary(version: String, binaryPath: String, releaseNoteInfo: ReleaseNoteInfo)
+    case createNewReleaseWithBinary(version: String, binaryPath: String, noteSource: ReleaseNoteSource)
+    
+    /// Checks the authentication status for the GitHub CLI.
+    case authStatus
+    
+    /// Checks that the GitHub CLI is available on the system.
+    case version
 }
 
 // MARK: - Arg
 public extension GitHubShellCommand {
-    /// The shell argument string corresponding to the GitHub shell command.
     var arg: String {
         switch self {
         case .getGithubUsername:
@@ -46,10 +51,14 @@ public extension GitHubShellCommand {
             return "gh release view --json tagName -q '.tagName'"
         case .createRemoteRepo(let name, let visibility, let details):
             return "gh repo create \(name) --\(visibility) -d '\(details)'"
-        case .createNewReleaseWithBinary(let version, let binaryPath, let releaseNoteInfo):
+        case .createNewReleaseWithBinary(let version, let binaryPath, let noteSource):
             return """
-            gh release create \(version) \(binaryPath) --title "\(version)" \(releaseNoteInfo.arg)
+            gh release create \(version) \(binaryPath) --title "\(version)" \(noteSource.arg)
             """
+        case .authStatus:
+            return "gh auth status"
+        case .version:
+            return "gh --version"
         }
     }
 }

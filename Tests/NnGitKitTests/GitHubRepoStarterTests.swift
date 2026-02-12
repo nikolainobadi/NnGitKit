@@ -31,7 +31,7 @@ extension GitHubRepoStarterTests {
     @Test("Successfully initializes a new GitHub repository when local git exists, remote does not exist, and NOT on main branch BUT can upload to non-main branch", arguments: RepoVisibility.allCases)
     func repoInitSuccessNonMainBranch(visibility: RepoVisibility) throws {
         let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "feature", githubURL: defaultURL)
-        let (sut, shell) = makeSUT(visibility: visibility, canUploadNonMainBranch: true, runResults: runResults)
+        let (sut, shell) = makeSUT(visibility: visibility, branchPolicy: .allowNonMain, runResults: runResults)
         let result = try sut.repoInit()
         
         #expect(result == defaultURL)
@@ -49,7 +49,8 @@ extension GitHubRepoStarterTests {
     
     @Test("Throws error if remote already exists")
     func repoInitThrowsIfRemoteExists() throws {
-        let sut = makeSUT(runResults: ["true", "origin"]).sut
+        let runResults = makeRunResults(localExists: true, remoteExists: true)
+        let sut = makeSUT(runResults: runResults).sut
         
         #expect(throws: GitShellError.remoteRepoAlreadyExists) {
             try sut.repoInit()
@@ -65,27 +66,137 @@ extension GitHubRepoStarterTests {
             try sut.repoInit()
         }
     }
+    
+    @Test("Uses configured default branch when main-only policy is enforced")
+    func repoInitHonorsCustomDefaultBranch() throws {
+        let defaultBranch = "develop"
+        let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: defaultBranch, githubURL: defaultURL, initDefaultBranch: defaultBranch)
+        let (sut, shell) = makeSUT(branchPolicy: .mainOnly, defaultBranch: defaultBranch, runResults: runResults)
+        
+        let result = try sut.repoInit()
+        
+        #expect(result == defaultURL)
+        assertShellCommands(shell: shell)
+    }
+    
+    @Test("Fails when branch differs from configured default under main-only policy")
+    func repoInitFailsWhenBranchNotDefault() throws {
+        let defaultBranch = "develop"
+        let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "feature", githubURL: defaultURL, initDefaultBranch: defaultBranch)
+        let sut = makeSUT(branchPolicy: .mainOnly, defaultBranch: defaultBranch, runResults: runResults).sut
+        
+        #expect(throws: GitShellError.currentBranchIsNotMainBranch) {
+            try sut.repoInit()
+        }
+    }
+    
+    @Test("Validation succeeds when repo is ready for init")
+    func validateRepoInitSuccess() throws {
+        let runResults = makeRunResults(localExists: true, remoteExists: false, currentBranch: "main")
+        let (sut, shell) = makeSUT(runResults: runResults)
+        
+        let result = try sut.validateRepoInit()
+        
+        #expect(result.currentBranchName == "main")
+        assertValidationCommands(shell: shell)
+    }
+    
+    @Test("Validation throws when remote exists")
+    func validateRepoInitThrowsIfRemoteExists() throws {
+        let runResults = makeRunResults(localExists: true, remoteExists: true)
+        let sut = makeSUT(runResults: runResults).sut
+        
+        #expect(throws: GitShellError.remoteRepoAlreadyExists) {
+            _ = try sut.validateRepoInit()
+        }
+    }
+    
+    @Test("Returns plan without executing when running repo init in dry-run mode")
+    func repoInitDryRunReturnsPlannedCommands() throws {
+        let (sut, shell) = makeSUT()
+        
+        let result = try sut.repoInit(mode: .dryRun)
+        
+        #expect(result.url == nil)
+        #expect(result.commands.count == 10)
+        #expect(result.commands[0] == makeGitHubCommand(.version, path: defaultPath))
+        #expect(result.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
+        #expect(result.commands[2] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(result.commands[3] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(result.commands[4] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
+        #expect(result.commands[5] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(result.commands[6] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(result.commands[7] == makeGitCommand(.getInitDefaultBranch, path: defaultPath))
+        #expect(result.commands[8] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: RepoVisibility.publicRepo.rawValue, details: projectDetails), path: defaultPath))
+        #expect(result.commands[9] == makeGitCommand(.getRemoteURL, path: defaultPath))
+        #expect(shell.commands.isEmpty)
+    }
+    
+    @Test("Throws when GitHub CLI is not available")
+    func repoInitThrowsIfGhMissing() throws {
+        let (sut, shell) = makeSUT(runResults: makeRunResults(), errorIndices: [0])
+        
+        #expect(throws: GitShellError.githubCLINotAvailable) {
+            try sut.repoInit()
+        }
+        #expect(shell.commands.first == makeGitHubCommand(.version, path: defaultPath))
+    }
+    
+    @Test("Throws when GitHub CLI is not authenticated")
+    func repoInitThrowsIfGhNotAuthenticated() throws {
+        let (sut, shell) = makeSUT(runResults: makeRunResults(), errorIndices: [1])
+        
+        #expect(throws: GitShellError.githubCLINotAuthenticated) {
+            try sut.repoInit()
+        }
+        #expect(shell.commands[0] == makeGitHubCommand(.version, path: defaultPath))
+        #expect(shell.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
+    }
+    
+    @Test("Throws partial success error when remote creation succeeds but fetching URL fails")
+    func repoInitThrowsOnPartialSuccess() throws {
+        // Fail after gh repo create (command index 8) when attempting to get remote URL
+        let (sut, shell) = makeSUT(runResults: makeRunResults(), errorIndices: [9])
+        
+        #expect(throws: GitShellError.remoteCreatedFollowupFailed) {
+            try sut.repoInit()
+        }
+        #expect(shell.commands[8] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: RepoVisibility.publicRepo.rawValue, details: projectDetails), path: defaultPath))
+        #expect(shell.commands[9] == makeGitCommand(.getRemoteURL, path: defaultPath))
+    }
 }
 
 
 // MARK: - SUT
 private extension GitHubRepoStarterTests {
-    func makeSUT(visibility: RepoVisibility = .publicRepo, canUploadNonMainBranch: Bool = false, path: String? = nil, runResults: [String] = [], throwError: Bool = false) -> (sut: GitHubRepoStarter, shell: MockShell) {
-        let shell = MockShell(runResults: runResults, throwError: throwError)
-        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, canUploadFromNonMainBranch: canUploadNonMainBranch)
+    func makeSUT(visibility: RepoVisibility = .publicRepo, branchPolicy: BranchPolicy = .mainOnly, defaultBranch: String = "main", path: String? = nil, runResults: [String] = [], throwError: Bool = false, errorIndices: Set<Int> = []) -> (sut: GitHubRepoStarter, shell: MockShell) {
+        let shell = MockShell(runResults: runResults, throwError: throwError, errorIndices: errorIndices)
+        let info = RepoInfo(name: projectName, details: projectDetails, visibility: visibility, branchPolicy: branchPolicy, defaultBranch: defaultBranch)
         let sut = GitHubRepoStarter(path: path ?? defaultPath, shell: shell, repoInfo: info)
         
         return (sut, shell)
     }
     
-    func makeRunResults(localExists: Bool = true, remoteExists: Bool = false, currentBranch: String = "main", githubURL: String = "https://github.com/username/repo") -> [String] {
-        return [
-            localExists ? "true" : "false",
-            remoteExists ? "origin" : "",
-            currentBranch,
-            "creatingRemoteRepo",
-            githubURL
-        ]
+    func makeRunResults(localExists: Bool = true, remoteExists: Bool = false, currentBranch: String = "main", githubURL: String = "https://github.com/username/repo", remoteDefaultBranch: String? = nil, initDefaultBranch: String = "") -> [String] {
+        var results: [String] = []
+        results.append("gh version")
+        results.append("gh auth status")
+        results.append(localExists ? "true" : "false") // local git check
+        results.append(remoteExists ? "origin" : "") // remote list
+        results.append(currentBranch) // current branch
+        results.append(localExists ? "true" : "false") // default branch local check
+        results.append(remoteExists ? "origin" : "") // default branch remote list
+        
+        if remoteExists {
+            results.append(remoteDefaultBranch ?? "refs/remotes/origin/main") // symbolic-ref output
+        } else {
+            results.append(initDefaultBranch) // init.defaultBranch config
+        }
+        
+        results.append("creatingRemoteRepo")
+        results.append(githubURL)
+        
+        return results
     }
 }
 
@@ -93,11 +204,28 @@ private extension GitHubRepoStarterTests {
 // MARK: - Assertion Helpers
 private extension GitHubRepoStarterTests {
     func assertShellCommands(shell: MockShell, visibility: RepoVisibility = .publicRepo) {
-        #expect(shell.commands.count == 5)
-        #expect(shell.commands[0] == makeGitCommand(.localGitCheck, path: defaultPath))
-        #expect(shell.commands[1] == makeGitCommand(.checkForRemote, path: defaultPath))
-        #expect(shell.commands[2] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
-        #expect(shell.commands[3] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: visibility.rawValue, details: projectDetails), path: defaultPath))
-        #expect(shell.commands[4] == makeGitCommand(.getRemoteURL, path: defaultPath))
+        #expect(shell.commands.count == 10)
+        #expect(shell.commands[0] == makeGitHubCommand(.version, path: defaultPath))
+        #expect(shell.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
+        #expect(shell.commands[2] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(shell.commands[3] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(shell.commands[4] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
+        #expect(shell.commands[5] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(shell.commands[6] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(shell.commands[7] == makeGitCommand(.getInitDefaultBranch, path: defaultPath))
+        #expect(shell.commands[8] == makeGitHubCommand(.createRemoteRepo(name: projectName, visibility: visibility.rawValue, details: projectDetails), path: defaultPath))
+        #expect(shell.commands[9] == makeGitCommand(.getRemoteURL, path: defaultPath))
+    }
+    
+    func assertValidationCommands(shell: MockShell) {
+        #expect(shell.commands.count == 8)
+        #expect(shell.commands[0] == makeGitHubCommand(.version, path: defaultPath))
+        #expect(shell.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
+        #expect(shell.commands[2] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(shell.commands[3] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(shell.commands[4] == makeGitCommand(.getCurrentBranchName, path: defaultPath))
+        #expect(shell.commands[5] == makeGitCommand(.localGitCheck, path: defaultPath))
+        #expect(shell.commands[6] == makeGitCommand(.checkForRemote, path: defaultPath))
+        #expect(shell.commands[7] == makeGitCommand(.getInitDefaultBranch, path: defaultPath))
     }
 }
