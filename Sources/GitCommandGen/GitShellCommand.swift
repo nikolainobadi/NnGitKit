@@ -21,7 +21,12 @@ public enum GitShellCommand {
     case commit(message: String)
     
     // MARK: - Repository
-    
+
+    /// Retrieves a Git configuration value by key.
+    ///
+    /// - Parameter key: The configuration key to look up.
+    case getConfig(key: String)
+
     /// Pulls changes from the remote, optionally using rebase.
     case pull(withRebase: Bool)
     
@@ -66,7 +71,14 @@ public enum GitShellCommand {
     case addGitHubRemote(username: String, projectName: String)
     
     // MARK: - Branches
-    
+
+    /// Creates a new local branch that tracks a remote branch.
+    ///
+    /// - Parameters:
+    ///   - local: The name of the local branch to create.
+    ///   - remote: The name of the remote branch to track.
+    case checkoutTracking(local: String, remote: String)
+
     /// Creates a new branch with the specified name.
     ///
     /// - Parameter name: The name of the new branch.
@@ -115,15 +127,44 @@ public enum GitShellCommand {
     case compareBranchAndRemote(local: String, remote: String)
     
     // MARK: - File Tracking
-    
+
     /// Retrieves a list of local changes.
     case getLocalChanges
-    
+
+    /// Lists all tracked files in the repository.
+    case listTrackedFiles
+
+    /// Removes a file from the index without deleting it from disk.
+    ///
+    /// - Parameter path: The path of the file to untrack.
+    case untrackFile(path: String)
+
     /// Clears all staged changes.
     case clearStagedFiles
-    
+
     /// Clears all unstaged changes.
     case clearUnstagedFiles
+
+    // MARK: - Reset
+
+    /// Performs a soft reset, moving HEAD back by the specified number of commits.
+    ///
+    /// - Parameter count: The number of commits to reset.
+    case softReset(count: Int)
+
+    /// Performs a hard reset, discarding changes and moving HEAD back.
+    ///
+    /// - Parameter count: The number of commits to reset.
+    case hardReset(count: Int)
+
+    // MARK: - History
+
+    /// Retrieves commit log entries in a specified format.
+    ///
+    /// - Parameters:
+    ///   - count: The number of commits to retrieve.
+    ///   - format: The pretty-print format string.
+    case log(count: Int, format: String)
 }
 
 // MARK: - Arg String
@@ -140,6 +181,8 @@ extension GitShellCommand {
             return "commit -m \"\(message)\""
             
         // Repository
+        case .getConfig(let key):
+            return "config --get \(key)"
         case .pull(let withRebase):
             return "pull\(withRebase ? " --rebase" : "")"
         case .push:
@@ -168,6 +211,8 @@ extension GitShellCommand {
             return "config --get init.defaultBranch"
             
         // Branches
+        case .checkoutTracking(let local, let remote):
+            return "checkout -b \(local) \(remote)"
         case .newBranch(let name):
             return "checkout -b \(name)"
         case .listLocalBranches:
@@ -190,10 +235,24 @@ extension GitShellCommand {
         // File Tracking
         case .getLocalChanges:
             return "status --porcelain"
+        case .listTrackedFiles:
+            return "ls-files"
+        case .untrackFile(let path):
+            return "rm --cached \(path)"
         case .clearStagedFiles:
             return "reset --hard HEAD"
         case .clearUnstagedFiles:
             return "clean -fd"
+
+        // Reset
+        case .softReset(let count):
+            return "reset --soft HEAD~\(count)"
+        case .hardReset(let count):
+            return "reset --hard HEAD~\(count)"
+
+        // History
+        case .log(let count, let format):
+            return "log -n \(count) --pretty=format:\"\(format)\""
         }
     }
 }

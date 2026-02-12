@@ -158,6 +158,61 @@ public extension GitShell {
         return .init(hasLocalGit: hasLocalGit, hasRemote: hasRemote, currentBranch: currentBranch, remotes: remotes)
     }
     
+    /// Lists the names of all local branches.
+    ///
+    /// - Parameter path: An optional path to the repository.
+    /// - Returns: An array of local branch names.
+    /// - Throws: An error if the underlying Git command fails.
+    func listLocalBranchNames(path: String? = nil) throws -> [String] {
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.listLocalBranches, path: path))
+        return GitShellOutput.parseBranchList(output)
+    }
+
+    /// Lists the names of all remote branches, with the `origin/` prefix stripped.
+    ///
+    /// - Parameter path: An optional path to the repository.
+    /// - Returns: An array of remote branch names.
+    /// - Throws: An error if the underlying Git command fails.
+    func listRemoteBranchNames(path: String? = nil) throws -> [String] {
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.listRemoteBranches, path: path))
+        return GitShellOutput.parseRemoteBranchList(output)
+    }
+
+    /// Retrieves the list of local changes as porcelain status lines.
+    ///
+    /// - Parameter path: An optional path to the repository.
+    /// - Returns: An array of change description strings.
+    /// - Throws: An error if the underlying Git command fails.
+    func getLocalChanges(path: String? = nil) throws -> [String] {
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.getLocalChanges, path: path))
+        return GitShellOutput.parseLocalChanges(output)
+    }
+
+    /// Retrieves the creation date of the specified branch.
+    ///
+    /// - Parameters:
+    ///   - name: The branch name.
+    ///   - path: An optional path to the repository.
+    /// - Returns: The creation date, or `nil` if parsing fails.
+    /// - Throws: An error if the underlying Git command fails.
+    func getBranchCreationDate(name: String, path: String? = nil) throws -> Date? {
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.getBranchCreationDate(branchName: name), path: path))
+        return GitShellOutput.parseBranchCreationDate(output)
+    }
+
+    /// Retrieves the synchronization status between a local and remote branch.
+    ///
+    /// - Parameters:
+    ///   - local: The local branch name.
+    ///   - remote: The remote branch name (e.g., `"origin/main"`).
+    ///   - path: An optional path to the repository.
+    /// - Returns: A `BranchSyncStatus` describing the relationship between the branches.
+    /// - Throws: An error if the underlying Git command fails.
+    func getSyncStatus(local: String, remote: String, path: String? = nil) throws -> BranchSyncStatus {
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.compareBranchAndRemote(local: local, remote: remote), path: path))
+        return GitShellOutput.parseSyncStatus(output)
+    }
+
     /// Runs a command and wraps failures with contextual details.
     func runWithOutputWrappingFailure(_ command: String) throws -> String {
         do {

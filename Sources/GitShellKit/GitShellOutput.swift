@@ -80,4 +80,67 @@ internal enum GitShellOutput {
         
         return trimmed
     }
+
+    /// Parses the output of `git branch --list` into an array of branch names.
+    static func parseBranchList(_ output: String) -> [String] {
+        output
+            .split(separator: "\n")
+            .map(String.init)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .map { $0.hasPrefix("* ") ? String($0.dropFirst(2)) : $0 }
+    }
+
+    /// Parses the output of `git branch -r` into an array of remote branch names without the `origin/` prefix.
+    static func parseRemoteBranchList(_ output: String) -> [String] {
+        output
+            .split(separator: "\n")
+            .map(String.init)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .filter { !$0.contains("HEAD ->") }
+            .map { $0.hasPrefix("origin/") ? String($0.dropFirst("origin/".count)) : $0 }
+    }
+
+    /// Parses the output of `git status --porcelain` into an array of change lines.
+    static func parseLocalChanges(_ output: String) -> [String] {
+        output
+            .split(separator: "\n")
+            .map(String.init)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    /// Parses a date string from git log `--date=iso-local` format.
+    static func parseBranchCreationDate(_ output: String) -> Date? {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.date(from: trimmed)
+    }
+
+    /// Parses the tab-separated output of `git rev-list --left-right --count` into a `BranchSyncStatus`.
+    static func parseSyncStatus(_ output: String) -> BranchSyncStatus {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: "\t")
+        guard parts.count == 2,
+              let ahead = Int(parts[0]),
+              let behind = Int(parts[1]) else {
+            return .undetermined
+        }
+
+        switch (ahead, behind) {
+        case (0, 0):
+            return .nsync
+        case (let a, 0):
+            return .ahead(a)
+        case (0, let b):
+            return .behind(b)
+        default:
+            return .diverged(ahead: ahead, behind: behind)
+        }
+    }
 }
