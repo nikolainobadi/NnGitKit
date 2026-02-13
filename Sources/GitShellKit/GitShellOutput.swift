@@ -145,6 +145,13 @@ internal enum GitShellOutput {
             }
     }
 
+    /// Parses the output of `git ls-files` into a count of tracked files.
+    static func parseTrackedFileCount(_ output: String) -> Int {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return 0 }
+        return trimmed.split(separator: "\n").count
+    }
+
     /// Parses the tab-separated output of `git rev-list --left-right --count` into a `BranchSyncStatus`.
     static func parseSyncStatus(_ output: String) -> BranchSyncStatus {
         let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)

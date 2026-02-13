@@ -137,25 +137,59 @@ public extension GitShell {
     /// - Returns: A `RepoState` snapshot with basic repo details.
     func inspectRepoState(at path: String?) throws -> RepoState {
         let hasLocalGit: Bool
-        
+
         do {
             hasLocalGit = try localGitExists(at: path)
         } catch {
             hasLocalGit = false
         }
-        
+
         guard hasLocalGit else {
             return RepoState(hasLocalGit: false, hasRemote: false, currentBranch: "", remotes: [])
         }
-        
+
         let remoteOutput = try runWithOutputWrappingFailure(makeGitCommand(.checkForRemote, path: path))
         let remotes = GitShellOutput.parseRemotes(remoteOutput)
         let hasRemote = GitShellOutput.containsOriginRemote(remoteOutput)
-        
+
         let currentBranch = try runWithOutputWrappingFailure(makeGitCommand(.getCurrentBranchName, path: path))
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        return .init(hasLocalGit: hasLocalGit, hasRemote: hasRemote, currentBranch: currentBranch, remotes: remotes)
+
+        // New fields
+        let changes = try getLocalChanges(path: path)
+        let hasUncommittedChanges = !changes.isEmpty
+
+        let defaultBranch: String?
+        do {
+            defaultBranch = try getDefaultBranch(at: path)
+        } catch {
+            defaultBranch = nil
+        }
+
+        let syncStatus: BranchSyncStatus?
+        if hasRemote {
+            do {
+                syncStatus = try getSyncStatus(local: currentBranch, remote: "origin/\(currentBranch)", path: path)
+            } catch {
+                syncStatus = .noRemoteBranch
+            }
+        } else {
+            syncStatus = nil
+        }
+
+        let trackedOutput = try runWithOutputWrappingFailure(makeGitCommand(.listTrackedFiles, path: path))
+        let trackedFileCount = GitShellOutput.parseTrackedFileCount(trackedOutput)
+
+        return .init(
+            hasLocalGit: hasLocalGit,
+            hasRemote: hasRemote,
+            currentBranch: currentBranch,
+            remotes: remotes,
+            hasUncommittedChanges: hasUncommittedChanges,
+            defaultBranch: defaultBranch,
+            syncStatus: syncStatus,
+            trackedFileCount: trackedFileCount
+        )
     }
     
     /// Lists the names of all local branches.
@@ -211,6 +245,59 @@ public extension GitShell {
     func getSyncStatus(local: String, remote: String, path: String? = nil) throws -> BranchSyncStatus {
         let output = try runWithOutputWrappingFailure(makeGitCommand(.compareBranchAndRemote(local: local, remote: remote), path: path))
         return GitShellOutput.parseSyncStatus(output)
+    }
+
+    /// Loads all local branches with metadata including merge status, sync status, and creation date.
+    ///
+    /// - Parameters:
+    ///   - mainBranch: The name of the main/default branch to check merge status against.
+    ///   - path: An optional path to the repository.
+    /// - Returns: An array of `GitBranch` values.
+    /// - Throws: An error if the underlying Git commands fail.
+    func loadBranches(mainBranch: String, path: String? = nil) throws -> [GitBranch] {
+        let branchNames = try listLocalBranchNames(path: path)
+        guard !branchNames.isEmpty else { return [] }
+
+        let currentBranch = try runWithOutputWrappingFailure(makeGitCommand(.getCurrentBranchName, path: path))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let mergedOutput = try runWithOutputWrappingFailure(makeGitCommand(.listMergedBranches(branchName: mainBranch), path: path))
+        let mergedNames = Set(GitShellOutput.parseBranchList(mergedOutput))
+
+        let remoteNames: Set<String>
+        do {
+            remoteNames = Set(try listRemoteBranchNames(path: path))
+        } catch {
+            remoteNames = []
+        }
+
+        return branchNames.map { name in
+            let creationDate: Date?
+            do {
+                creationDate = try getBranchCreationDate(name: name, path: path)
+            } catch {
+                creationDate = nil
+            }
+
+            let syncStatus: BranchSyncStatus
+            if remoteNames.contains(name) {
+                do {
+                    syncStatus = try getSyncStatus(local: name, remote: "origin/\(name)", path: path)
+                } catch {
+                    syncStatus = .undetermined
+                }
+            } else {
+                syncStatus = .noRemoteBranch
+            }
+
+            return GitBranch(
+                name: name,
+                isMerged: mergedNames.contains(name),
+                isCurrentBranch: name == currentBranch,
+                creationDate: creationDate,
+                syncStatus: syncStatus
+            )
+        }
     }
 
     /// Validates that the GitHub CLI is available and authenticated.

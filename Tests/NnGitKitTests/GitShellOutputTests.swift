@@ -53,4 +53,22 @@ struct GitShellOutputTests {
         #expect(GitShellOutput.parseRemoteDefaultBranch("HEAD") == nil)
         #expect(GitShellOutput.parseRemoteDefaultBranch("") == nil)
     }
+
+    // MARK: - parseTrackedFileCount
+    @Test("Counts multiple tracked files from multi-line output")
+    func parseTrackedFileCountMultiLine() {
+        let output = "file1.swift\nfile2.swift\nfile3.swift"
+        #expect(GitShellOutput.parseTrackedFileCount(output) == 3)
+    }
+
+    @Test("Returns zero for empty tracked files output")
+    func parseTrackedFileCountEmpty() {
+        #expect(GitShellOutput.parseTrackedFileCount("") == 0)
+        #expect(GitShellOutput.parseTrackedFileCount("  \n  ") == 0)
+    }
+
+    @Test("Counts single tracked file")
+    func parseTrackedFileCountSingle() {
+        #expect(GitShellOutput.parseTrackedFileCount("Package.swift") == 1)
+    }
 }
