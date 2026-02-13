@@ -24,14 +24,19 @@ public enum GitHubShellCommand {
     ///   - details: A brief description of the repository.
     case createRemoteRepo(name: String, visibility: String, details: String)
 
-    /// Creates a new release with the specified version, binary path, and release notes.
+    /// Creates a new release with the specified version, binary paths, and release notes.
     ///
     /// - Parameters:
     ///   - version: The version tag for the release.
-    ///   - binaryPath: The path to the binary to include in the release.
-    ///   - releaseNotes: The notes to include with the release.
-    case createNewReleaseWithBinary(version: String, binaryPath: String, noteSource: ReleaseNoteSource)
+    ///   - binaryPaths: The paths to the binaries to include in the release.
+    ///   - noteSource: The source of the release notes.
+    case createNewRelease(version: String, binaryPaths: [String], noteSource: ReleaseNoteSource)
     
+    /// Retrieves the asset URLs for a specific release version.
+    ///
+    /// - Parameter version: The version tag to query.
+    case getReleaseAssetURLs(version: String)
+
     /// Checks the authentication status for the GitHub CLI.
     case authStatus
     
@@ -51,10 +56,13 @@ public extension GitHubShellCommand {
             return "gh release view --json tagName -q '.tagName'"
         case .createRemoteRepo(let name, let visibility, let details):
             return "gh repo create \(name) --\(visibility) -d '\(details)'"
-        case .createNewReleaseWithBinary(let version, let binaryPath, let noteSource):
+        case .createNewRelease(let version, let binaryPaths, let noteSource):
+            let paths = binaryPaths.joined(separator: " ")
             return """
-            gh release create \(version) \(binaryPath) --title "\(version)" \(noteSource.arg)
+            gh release create \(version) \(paths) --title "\(version)" \(noteSource.arg)
             """
+        case .getReleaseAssetURLs(let version):
+            return "gh release view \(version) --json assets -q '.assets[].url'"
         case .authStatus:
             return "gh auth status"
         case .version:

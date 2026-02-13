@@ -213,6 +213,36 @@ public extension GitShell {
         return GitShellOutput.parseSyncStatus(output)
     }
 
+    /// Validates that the GitHub CLI is available and authenticated.
+    ///
+    /// - Parameter path: An optional path to use for command execution context.
+    /// - Throws: `GitShellError.githubCLINotAvailable` or `GitShellError.githubCLINotAuthenticated`.
+    func validateGitHubCLI(path: String? = nil) throws {
+        do {
+            try runAndPrint(makeGitHubCommand(.version, path: path))
+        } catch {
+            throw GitShellError.githubCLINotAvailable
+        }
+
+        do {
+            try runAndPrint(makeGitHubCommand(.authStatus, path: path))
+        } catch {
+            throw GitShellError.githubCLINotAuthenticated
+        }
+    }
+
+    /// Retrieves recent commits as structured `CommitInfo` values.
+    ///
+    /// - Parameters:
+    ///   - count: The maximum number of commits to retrieve. Defaults to 10.
+    ///   - path: An optional path to the repository.
+    /// - Returns: An array of `CommitInfo` values.
+    /// - Throws: An error if the underlying Git command fails.
+    func getRecentCommits(count: Int = 10, path: String? = nil) throws -> [CommitInfo] {
+        let output = try runWithOutputWrappingFailure(makeGitCommand(.log(count: count, format: GitShellOutput.commitLogFormat), path: path))
+        return GitShellOutput.parseCommitLog(output)
+    }
+
     /// Runs a command and wraps failures with contextual details.
     func runWithOutputWrappingFailure(_ command: String) throws -> String {
         do {

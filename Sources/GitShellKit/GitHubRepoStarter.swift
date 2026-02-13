@@ -191,17 +191,7 @@ public extension GitHubRepoStarter {
     ///
     /// - Throws: `GitShellError.githubCLINotAvailable` or `GitShellError.githubCLINotAuthenticated`.
     func validateGitHubCLI() throws {
-        do {
-            try shell.runAndPrint(makeGitHubCommand(.version, path: path))
-        } catch {
-            throw GitShellError.githubCLINotAvailable
-        }
-        
-        do {
-            try shell.runAndPrint(makeGitHubCommand(.authStatus, path: path))
-        } catch {
-            throw GitShellError.githubCLINotAuthenticated
-        }
+        try shell.validateGitHubCLI(path: path)
     }
 }
 

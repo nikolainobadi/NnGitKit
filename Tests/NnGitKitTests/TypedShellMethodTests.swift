@@ -81,6 +81,32 @@ struct TypedShellParsingTests {
     func parseBranchCreationDateGarbage() {
         #expect(GitShellOutput.parseBranchCreationDate("not-a-date") == nil)
     }
+
+    // MARK: - parseCommitLog
+    @Test("Parses valid multi-line commit log into CommitInfo array")
+    func parseCommitLogValid() {
+        let output = "abc1234\tFix login bug\tJane Doe\tjane@example.com\t2 days ago\ndef5678\tAdd tests\tJohn Smith\tjohn@example.com\t3 hours ago"
+        let result = GitShellOutput.parseCommitLog(output)
+
+        #expect(result.count == 2)
+        #expect(result[0] == CommitInfo(hash: "abc1234", message: "Fix login bug", authorName: "Jane Doe", authorEmail: "jane@example.com", relativeDate: "2 days ago"))
+        #expect(result[1] == CommitInfo(hash: "def5678", message: "Add tests", authorName: "John Smith", authorEmail: "john@example.com", relativeDate: "3 hours ago"))
+    }
+
+    @Test("Returns empty array for empty commit log output")
+    func parseCommitLogEmpty() {
+        #expect(GitShellOutput.parseCommitLog("").isEmpty)
+    }
+
+    @Test("Skips malformed lines in commit log")
+    func parseCommitLogSkipsMalformed() {
+        let output = "abc1234\tFix bug\tJane\tjane@example.com\t2 days ago\nmalformed line without tabs\ndef5678\tAdd tests\tJohn\tjohn@example.com\t3 hours ago"
+        let result = GitShellOutput.parseCommitLog(output)
+
+        #expect(result.count == 2)
+        #expect(result[0].hash == "abc1234")
+        #expect(result[1].hash == "def5678")
+    }
 }
 
 
@@ -146,6 +172,27 @@ struct TypedShellMethodIntegrationTests {
         let (sut, _) = makeSUT(runResults: [""])
 
         let result = try sut.listLocalBranchNames(path: defaultPath)
+
+        #expect(result.isEmpty)
+    }
+
+    @Test("getRecentCommits sends correct command and returns parsed result")
+    func getRecentCommits() throws {
+        let (sut, shell) = makeSUT(runResults: ["abc1234\tFix bug\tJane\tjane@example.com\t2 days ago"])
+
+        let result = try sut.getRecentCommits(count: 5, path: defaultPath)
+
+        #expect(result.count == 1)
+        #expect(result[0].hash == "abc1234")
+        #expect(shell.commands.count == 1)
+        #expect(shell.commands[0] == makeGitCommand(.log(count: 5, format: GitShellOutput.commitLogFormat), path: defaultPath))
+    }
+
+    @Test("getRecentCommits returns empty array for empty output")
+    func getRecentCommitsEmpty() throws {
+        let (sut, _) = makeSUT(runResults: [""])
+
+        let result = try sut.getRecentCommits(path: defaultPath)
 
         #expect(result.isEmpty)
     }

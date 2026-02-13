@@ -91,6 +91,39 @@ extension GitShellHelperTests {
 }
 
 
+// MARK: - Validate GitHub CLI
+extension GitShellHelperTests {
+    @Test("validateGitHubCLI sends version and auth status commands on success")
+    func validateGitHubCLISuccess() throws {
+        let shell = makeShell(runResults: ["", ""])
+
+        try shell.validateGitHubCLI(path: defaultPath)
+
+        #expect(shell.commands.count == 2)
+        #expect(shell.commands[0] == makeGitHubCommand(.version, path: defaultPath))
+        #expect(shell.commands[1] == makeGitHubCommand(.authStatus, path: defaultPath))
+    }
+
+    @Test("validateGitHubCLI throws githubCLINotAvailable when version check fails")
+    func validateGitHubCLINotAvailable() throws {
+        let shell = MockShell(runResults: [], errorIndices: [0])
+
+        #expect(throws: GitShellError.githubCLINotAvailable) {
+            try shell.validateGitHubCLI(path: defaultPath)
+        }
+    }
+
+    @Test("validateGitHubCLI throws githubCLINotAuthenticated when auth check fails")
+    func validateGitHubCLINotAuthenticated() throws {
+        let shell = MockShell(runResults: [""], errorIndices: [1])
+
+        #expect(throws: GitShellError.githubCLINotAuthenticated) {
+            try shell.validateGitHubCLI(path: defaultPath)
+        }
+    }
+}
+
+
 // MARK: - Helpers
 private extension GitShellHelperTests {
     func makeShell(runResults: [String]) -> MockShell {

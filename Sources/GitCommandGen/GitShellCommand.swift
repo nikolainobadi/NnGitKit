@@ -157,6 +157,39 @@ public enum GitShellCommand {
     /// - Parameter count: The number of commits to reset.
     case hardReset(count: Int)
 
+    // MARK: - Merge & Stash
+
+    /// Merges the specified branch into the current branch.
+    ///
+    /// - Parameter branch: The branch to merge.
+    case merge(branch: String)
+
+    /// Stashes the current working directory changes.
+    case stash
+
+    /// Pops the most recent stash entry.
+    case stashPop
+
+    // MARK: - Diff
+
+    /// Shows unstaged changes in the working directory.
+    case diff
+
+    /// Shows staged changes that are ready to be committed.
+    case diffStaged
+
+    // MARK: - Tags
+
+    /// Creates an annotated tag with the specified name and message.
+    ///
+    /// - Parameters:
+    ///   - name: The tag name.
+    ///   - message: The tag message.
+    case tag(name: String, message: String)
+
+    /// Lists all tags in the repository.
+    case listTags
+
     // MARK: - History
 
     /// Retrieves commit log entries in a specified format.
@@ -176,7 +209,7 @@ extension GitShellCommand {
         case .gitInit:
             return "init"
         case .addAll:
-            return "add ."
+            return "add --all"
         case .commit(let message):
             return "commit -m \"\(message)\""
             
@@ -249,6 +282,26 @@ extension GitShellCommand {
             return "reset --soft HEAD~\(count)"
         case .hardReset(let count):
             return "reset --hard HEAD~\(count)"
+
+        // Merge & Stash
+        case .merge(let branch):
+            return "merge \(branch)"
+        case .stash:
+            return "stash"
+        case .stashPop:
+            return "stash pop"
+
+        // Diff
+        case .diff:
+            return "diff"
+        case .diffStaged:
+            return "diff --staged"
+
+        // Tags
+        case .tag(let name, let message):
+            return "tag -a \(name) -m \"\(message)\""
+        case .listTags:
+            return "tag -l"
 
         // History
         case .log(let count, let format):

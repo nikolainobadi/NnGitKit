@@ -122,6 +122,29 @@ internal enum GitShellOutput {
         return formatter.date(from: trimmed)
     }
 
+    /// The `--pretty=format:` template for structured commit output.
+    static let commitLogFormat = "%h\t%s\t%an\t%ae\t%ar"
+
+    /// Parses tab-delimited commit log output into an array of `CommitInfo`.
+    static func parseCommitLog(_ output: String) -> [CommitInfo] {
+        let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+
+        return trimmed
+            .split(separator: "\n")
+            .compactMap { line -> CommitInfo? in
+                let parts = line.split(separator: "\t", maxSplits: 4).map(String.init)
+                guard parts.count == 5 else { return nil }
+                return CommitInfo(
+                    hash: parts[0],
+                    message: parts[1],
+                    authorName: parts[2],
+                    authorEmail: parts[3],
+                    relativeDate: parts[4]
+                )
+            }
+    }
+
     /// Parses the tab-separated output of `git rev-list --left-right --count` into a `BranchSyncStatus`.
     static func parseSyncStatus(_ output: String) -> BranchSyncStatus {
         let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
