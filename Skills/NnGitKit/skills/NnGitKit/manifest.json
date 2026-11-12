@@ -1,0 +1,255 @@
+{
+  "manifestVersion": 1,
+  "skillName": "NnGitKit",
+  "packagePath": ".",
+  "git": {
+    "sha": "f4f13cd4ef9caf35ac03a3ce9491722e8ce0a141",
+    "tag": null
+  },
+  "scannedAt": "2026-11-11T00:00:00Z",
+  "files": {
+    "Sources/NnGitKit/Client/BranchUpstream.swift": "0876c8184959857d0b47d988457b88c958dcc978ecda0de5267aa95fc0ce76dc",
+    "Sources/NnGitKit/Client/CommitActivity.swift": "1d7642f345b6fb31adf8bd2bd9662ec37bb7ebbc882aa176984d2ad154127499",
+    "Sources/NnGitKit/Client/CommitChanges.swift": "de7f6cc4a8fe310cf39d5322e7ae8d4c851dc57e995bda2bcb76c29518463de7",
+    "Sources/NnGitKit/Client/CommitSummary.swift": "c0549729ffe9583ac08cda22e3c9e7387ec676c5fffdc058f5418097f507b42c",
+    "Sources/NnGitKit/Client/FetchResult.swift": "a56c8f8eeea5e543709e262d1c76ec06c1ef3264ffd4b731daba89fb72a4e193",
+    "Sources/NnGitKit/Client/FileChange.swift": "6afeb306aa7e3e2b748f7ed0954f6dda7f6ff05ce9b137af24a1f544c6348517",
+    "Sources/NnGitKit/Client/GitClient+Branches.swift": "77c3a36ea969e593c3a34dbb14715cbc6bf7f221fedd5455b569c3689546c1cf",
+    "Sources/NnGitKit/Client/GitClient+Commits.swift": "6a55418bfb6252d5ce4336c0b553fbf531a1af54f552df13a656950fd8825e25",
+    "Sources/NnGitKit/Client/GitClient+Config.swift": "61c4922a6954953e8125d4e290d076bd8e27730baf5f0e412e8997db0c56e98c",
+    "Sources/NnGitKit/Client/GitClient+Discard.swift": "9bb5f27318ee757772eb50e837c9f6e0fcac61a0585cc04443f165e56ab13f47",
+    "Sources/NnGitKit/Client/GitClient+Init.swift": "0590cfa546d80cf36d6d6692313aea0580c458cd62a0e070fe754fe758d8576e",
+    "Sources/NnGitKit/Client/GitClient+Remotes.swift": "c98b98032ce16d83e001cdc9aea785140ae23be4ff1bd923feabeb3fd35a511b",
+    "Sources/NnGitKit/Client/GitClient+Reset.swift": "3e8eeab9ff5400525e92cad97d4357fe372da10ad7f08bce3df9a89f9f01e7a4",
+    "Sources/NnGitKit/Client/GitClient+Status.swift": "1a8ebad799180244bfc02319a62294f99007bc58690fd7b7412a17579043b176",
+    "Sources/NnGitKit/Client/GitClient+Tags.swift": "1d3eab3ed77f4fdda44e8555857c34e54637b1eb22aef6a481774b3f3524c028",
+    "Sources/NnGitKit/Client/GitClient+Tracking.swift": "c15878691d79dd65ac9ff2440630f0b62584569b8da8a55ad9b691b222c4feab",
+    "Sources/NnGitKit/Client/GitClient+Worktrees.swift": "a49e99ba52e6da829e14f2c7fac735d5410e3b3662659fb0409c21a1bfa67a20",
+    "Sources/NnGitKit/Client/GitClient.swift": "f9bfaa2123cdc57ca640df734025daa2e70b51888868a1dd60f4f69af8bf76f9",
+    "Sources/NnGitKit/Client/GitError.swift": "cd47acf9840584c638c660bc4f31fd8727921e9c87edc7c9366a42abe8ecc9ea",
+    "Sources/NnGitKit/Client/GitHubClient+PullRequests.swift": "4b52933cd4424a2da4435ab529ab47397b0944349e3f512d45b97bcc1cd3adda",
+    "Sources/NnGitKit/Client/GitHubClient+Releases.swift": "184a15690fc1db0fb4ccbf70c4abbd2bf9e7379f79d6ad3120f26bdaeb95b666",
+    "Sources/NnGitKit/Client/GitHubClient+Repos.swift": "32e3c2bd492287a7bcc11d93948047fd9e97e45da72a84833e793a18ca0f9c40",
+    "Sources/NnGitKit/Client/GitHubClient.swift": "2fb54480686af90bc9be72858fa2138f4ee05b26ad82c79b589fb5998df36744",
+    "Sources/NnGitKit/Client/GitHubError.swift": "f2566469d55da3518f735bb7b674bb574d05fd7f32c1188993d6ce7301956c22",
+    "Sources/NnGitKit/Client/LocalBranch.swift": "1eda69199aa8a2db6ce71e09c0b5ccd6229f90e6e93201515c9ae654c9e33077",
+    "Sources/NnGitKit/Client/PullRequestDetails.swift": "0f4c6a92fef3ff2b54a879412bea2c54295473ef1872be3584e69711b82f2875",
+    "Sources/NnGitKit/Client/RemoteBranchRef.swift": "d8a3e67e2ea385c460003af1c14d9a5628159e0475f44594bc326e56e6fb0b88",
+    "Sources/NnGitKit/Client/RepoVisibility.swift": "f1608c0a2554dfcd04e702855e3065fa0135837735a6552d0da213c0547add4c",
+    "Sources/NnGitKit/Client/RepositoryRootLookup.swift": "eddeb654010f3131f5ec3d0d2cfe0177e0ec7a13b7d74358dc36dc28930b1fd3",
+    "Sources/NnGitKit/Client/RepositoryWebURL.swift": "5704c0ee5d8a7a3e45d5ecdd92b66212db851fba4ef215e54d1d8f17dfc54fc4",
+    "Sources/NnGitKit/Client/UncommittedFile.swift": "e60bbd1752b707d6189afa0a60cd5d3001b85aca87e11d8de0d2c15c16e99732",
+    "Sources/NnGitKit/Client/UncommittedFileCounts.swift": "50afab51f824eedde3bcd4a80d95232f07f7d1fa35051f457db24c9926709242",
+    "Sources/NnGitKit/Client/Worktree.swift": "eaf878ef9ce2db53e64d9531c9dcba461ef9c282b70d82a83a164fde797c250d",
+    "Sources/NnGitKit/DefaultBranch/DefaultBranchConventions.swift": "42b557c57c04d28104e6d0f1624b7ef30fb67f84050af60e3c49a2da205d0ac3",
+    "Sources/NnGitKit/DefaultBranch/DefaultBranchDetector.swift": "a7cb6935f2c5e0fac0360d7634b9cb5654e2918b963a080e8e815904990d2ffb",
+    "Sources/NnGitKit/DefaultBranch/DefaultBranchRefDetector.swift": "ab091159f20c0e80b5fec6925faa816b5dc94ffcc7a066d9e2f966462181d2cc",
+    "Sources/NnGitKit/DefaultBranch/DefaultRefCandidatesBuilder.swift": "2f26562c3ff5db0ce57356df612ece841e480e2278d3a95bf4a49c21e9e112d9",
+    "Sources/NnGitKit/Running/GitCommand.swift": "7a8f946fc975ba8a390d84932d5c8b9857b8eb954c895c79382ac1781ce163ce",
+    "Sources/NnGitKit/Running/GitCommandRunner.swift": "1dd1a6619eeb802fa41d44c40a0d009348d83334ffc580256a1d656b4904a500",
+    "Sources/NnGitKit/Running/GitHubCommand.swift": "b149437ceea7bc1546ee26d9a80e8c5bfc8637e44534c48fc64feb53fd685397",
+    "Sources/NnGitKit/Running/GitResetMode.swift": "caf2c181d554581262a1fec004799ece8db75a22dabd6cd175a43f52d243ae38",
+    "Sources/NnGitKit/Running/WorktreeRemovalForce.swift": "6cd629d0e154115da63b887ec100d9c1782425c3b05c6bad9a72e7eae986ec8a",
+    "Sources/NnGitTesting/Exports.swift": "595e5db11092c3b238f5ade5389a667c87a5de08f4cb2e1ed7c5201dd05f6842",
+    "Sources/NnGitTesting/MockGitCommandRunner.swift": "8c2b1357138ea0d4476b9310a5dbb92703c0064f5bb837d7995fb64c0d3ca48e",
+    "Sources/NnGitTesting/RecordingGitCommandRunner.swift": "d8ad2ad2c08e0b5fa7687cbca52c7eaeb56abe640c19731b9723d8df1f020b06"
+  },
+  "types": {
+    "GitCommandRunner": {
+      "file": "Sources/NnGitKit/Running/GitCommandRunner.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitCommandRunner",
+      "conforms": []
+    },
+    "GitCommandOutput": {
+      "file": "Sources/NnGitKit/Running/GitCommandRunner.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitCommandRunner",
+      "conforms": []
+    },
+    "GitCommand": {
+      "file": "Sources/NnGitKit/Running/GitCommand.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitCommandRunner",
+      "conforms": []
+    },
+    "GitHubCommand": {
+      "file": "Sources/NnGitKit/Running/GitHubCommand.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitCommandRunner",
+      "conforms": []
+    },
+    "WorktreeRemovalForce": {
+      "file": "Sources/NnGitKit/Running/WorktreeRemovalForce.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitClient",
+      "conforms": []
+    },
+    "GitResetMode": {
+      "file": "Sources/NnGitKit/Running/GitResetMode.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitResetMode",
+      "conforms": []
+    },
+    "GitClient": {
+      "file": "Sources/NnGitKit/Client/GitClient.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitClient",
+      "conforms": []
+    },
+    "GitHubClient": {
+      "file": "Sources/NnGitKit/Client/GitHubClient.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitHubClient",
+      "conforms": []
+    },
+    "GitError": {
+      "file": "Sources/NnGitKit/Client/GitError.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitError",
+      "conforms": [
+        "Error",
+        "LocalizedError"
+      ]
+    },
+    "GitHubError": {
+      "file": "Sources/NnGitKit/Client/GitHubError.swift",
+      "doc": "ApiReference.md",
+      "anchor": "GitHubError",
+      "conforms": [
+        "Error",
+        "LocalizedError"
+      ]
+    },
+    "LocalBranch": {
+      "file": "Sources/NnGitKit/Client/LocalBranch.swift",
+      "doc": "ApiReference.md",
+      "anchor": "LocalBranch",
+      "conforms": []
+    },
+    "BranchUpstream": {
+      "file": "Sources/NnGitKit/Client/BranchUpstream.swift",
+      "doc": "ApiReference.md",
+      "anchor": "BranchUpstream",
+      "conforms": []
+    },
+    "Worktree": {
+      "file": "Sources/NnGitKit/Client/Worktree.swift",
+      "doc": "ApiReference.md",
+      "anchor": "Worktree",
+      "conforms": []
+    },
+    "UncommittedFile": {
+      "file": "Sources/NnGitKit/Client/UncommittedFile.swift",
+      "doc": "ApiReference.md",
+      "anchor": "UncommittedFile",
+      "conforms": []
+    },
+    "UncommittedFileCounts": {
+      "file": "Sources/NnGitKit/Client/UncommittedFileCounts.swift",
+      "doc": "ApiReference.md",
+      "anchor": "UncommittedFileCounts",
+      "conforms": []
+    },
+    "CommitSummary": {
+      "file": "Sources/NnGitKit/Client/CommitSummary.swift",
+      "doc": "ApiReference.md",
+      "anchor": "CommitSummary",
+      "conforms": []
+    },
+    "CommitActivity": {
+      "file": "Sources/NnGitKit/Client/CommitActivity.swift",
+      "doc": "ApiReference.md",
+      "anchor": "CommitActivity",
+      "conforms": []
+    },
+    "CommitChanges": {
+      "file": "Sources/NnGitKit/Client/CommitChanges.swift",
+      "doc": "ApiReference.md",
+      "anchor": "CommitChanges",
+      "conforms": []
+    },
+    "FileChange": {
+      "file": "Sources/NnGitKit/Client/FileChange.swift",
+      "doc": "ApiReference.md",
+      "anchor": "FileChange",
+      "conforms": []
+    },
+    "PullRequestDetails": {
+      "file": "Sources/NnGitKit/Client/PullRequestDetails.swift",
+      "doc": "ApiReference.md",
+      "anchor": "PullRequestDetails",
+      "conforms": []
+    },
+    "FetchResult": {
+      "file": "Sources/NnGitKit/Client/FetchResult.swift",
+      "doc": "ApiReference.md",
+      "anchor": "FetchResult",
+      "conforms": []
+    },
+    "RepositoryRootLookup": {
+      "file": "Sources/NnGitKit/Client/RepositoryRootLookup.swift",
+      "doc": "ApiReference.md",
+      "anchor": "RepositoryRootLookup",
+      "conforms": []
+    },
+    "RepoVisibility": {
+      "file": "Sources/NnGitKit/Client/RepoVisibility.swift",
+      "doc": "ApiReference.md",
+      "anchor": "RepoVisibility",
+      "conforms": []
+    },
+    "RemoteBranchRef": {
+      "file": "Sources/NnGitKit/Client/RemoteBranchRef.swift",
+      "doc": "ApiReference.md",
+      "anchor": "DefaultBranch",
+      "conforms": []
+    },
+    "RepositoryWebURL": {
+      "file": "Sources/NnGitKit/Client/RepositoryWebURL.swift",
+      "doc": "ApiReference.md",
+      "anchor": "DefaultBranch",
+      "conforms": []
+    },
+    "DefaultBranchConventions": {
+      "file": "Sources/NnGitKit/DefaultBranch/DefaultBranchConventions.swift",
+      "doc": "ApiReference.md",
+      "anchor": "DefaultBranch",
+      "conforms": []
+    },
+    "DefaultBranchDetector": {
+      "file": "Sources/NnGitKit/DefaultBranch/DefaultBranchDetector.swift",
+      "doc": "ApiReference.md",
+      "anchor": "DefaultBranch",
+      "conforms": []
+    },
+    "DefaultBranchRefDetector": {
+      "file": "Sources/NnGitKit/DefaultBranch/DefaultBranchRefDetector.swift",
+      "doc": "ApiReference.md",
+      "anchor": "DefaultBranch",
+      "conforms": []
+    },
+    "DefaultRefCandidatesBuilder": {
+      "file": "Sources/NnGitKit/DefaultBranch/DefaultRefCandidatesBuilder.swift",
+      "doc": "ApiReference.md",
+      "anchor": "DefaultBranch",
+      "conforms": []
+    },
+    "MockGitCommandRunner": {
+      "file": "Sources/NnGitTesting/MockGitCommandRunner.swift",
+      "doc": "TestingReference.md",
+      "anchor": "MockGitCommandRunner",
+      "conforms": [
+        "GitCommandRunner"
+      ]
+    },
+    "RecordingGitCommandRunner": {
+      "file": "Sources/NnGitTesting/RecordingGitCommandRunner.swift",
+      "doc": "TestingReference.md",
+      "anchor": "RecordingGitCommandRunner",
+      "conforms": [
+        "GitCommandRunner"
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "NnGitKit",
+  "description": "NnGitKit Swift API reference for typed git and gh commands, GitClient and GitHubClient, consumer-supplied command runners, and MockGitCommandRunner / RecordingGitCommandRunner testing utilities.",
+  "author": {
+    "name": "Nikolai Nobadi"
+  }
+}

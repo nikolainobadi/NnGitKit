@@ -10,6 +10,20 @@ swift test                                               # Run all tests
 swift test --filter NnGitKitTests.GitClientBranchesTests # Run a single test suite
 ```
 
+## Skill Documentation
+
+`Skills/NnGitKit/` holds the API-reference skill for this package (`SKILL.md`, `ApiReference.md`,
+`TestingReference.md`). It lives here so the API and its documentation change in the same PR.
+
+- **Any PR changing the public API must update `Skills/`.** Nothing enforces this in CI, so check it
+  by hand whenever a PR touches `public` declarations in `Sources/`. `ApiReference.md` lists the
+  `GitCommand`/`GitHubCommand` case each client method runs and how it treats non-zero exits, so
+  changing either one is an API change for the docs too.
+- **`Skills/NnGitKit/.claude-plugin/plugin.json` deliberately has no `version` field.**
+- **SwiftPM ignores `Skills/`.** It is not a target and must not become one.
+- `Skills/NnGitKit/skills/NnGitKit/manifest.json` pins the sha and per-file hashes of the `Sources/`
+  state the docs describe. Regenerate it when the docs are updated.
+
 Requires Swift 6.4 tools and macOS 15+. Every target treats warnings as errors.
 
 ## Architecture
