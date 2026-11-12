@@ -1,0 +1,16 @@
+{
+  "targets" : [
+    {
+      "buildAndTestCommands" : [
+        "swift build",
+        "swift test --enable-code-coverage"
+      ],
+      "name" : "NnGitKit",
+      "path" : ".",
+      "skills" : [
+        "Skills/NnGitKit"
+      ],
+      "targetType" : "library"
+    }
+  ]
+}
