@@ -1,3 +1,5 @@
+import Foundation
+
 // MARK: - Remotes
 extension GitClient {
     public func remoteNames(at path: String) throws -> [String] {
@@ -24,6 +26,14 @@ extension GitClient {
         }
 
         return heads
+    }
+
+    /// Clones `url` into `destination`, which must be an absolute path. Git runs in the destination's
+    /// parent folder, so that folder must already exist and the destination must not.
+    public func clone(url: String, to destination: String) throws {
+        let parent = (destination as NSString).deletingLastPathComponent
+
+        try runExpectingSuccess(.clone(url: url, destination: destination), at: parent)
     }
 
     public func pushBranch(_ branch: String, to remote: String, at path: String) throws {

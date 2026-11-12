@@ -73,6 +73,9 @@ public enum GitCommand: Equatable, Sendable {
     case writeTree
     case readTree(tree: String)
     case diffCached
+    case clone(url: String, destination: String)
+    case stashList
+    case lsFilesIgnoredOthers
 }
 
 // MARK: - Arguments
@@ -239,6 +242,12 @@ extension GitCommand {
             return ["read-tree", tree]
         case .diffCached:
             return ["diff", "--cached", "--no-color", "--no-ext-diff"]
+        case .clone(let url, let destination):
+            return ["clone", "--", url, destination]
+        case .stashList:
+            return ["stash", "list"]
+        case .lsFilesIgnoredOthers:
+            return ["ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--directory"]
         }
     }
 }
