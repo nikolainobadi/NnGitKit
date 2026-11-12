@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-11
+
+Full rewrite. NnGitKit now ships the standalone git/GitHub kit extracted from GitHappens. The 0.x API is removed; consumers that need it should stay on `0.6.x`.
+
+### Added
+- `NnGitKit` library: typed `GitCommand` / `GitHubCommand` enums that produce argument arrays, never shell strings
+- `GitCommandRunner` protocol returning `GitCommandOutput` (exit code and output)
+- `GitClient` covering status, branches, commits, remotes, tracking, tags, config, worktrees, discard/reset, merged-branch detection, and commit activity
+- `GitHubClient` covering auth, repos, pull requests, and releases
+- `GitError` and `GitHubError` with descriptive `LocalizedError` messages
+- Default-branch detection helpers
+- `NnGitTesting` library with `MockGitCommandRunner` and `RecordingGitCommandRunner`
+
+### Changed
+- Requires Swift 6.4 tools and macOS 15
+- Every target treats warnings as errors
+
+### Removed
+- `GitShellKit` and `GitCommandGen` libraries (`GitShell`, `GitShellCommand`, `GitHubShellCommand`, `GitStarter`, `GitHubRepoStarter`, `ExecutionMode`, `GitCommandFailure`, `ReleaseNoteSource`)
+
 ## [0.6.1] - 2025-07-01
 
 ### Changed
@@ -31,7 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swift 6.0 strict concurrency support
 - CI via GitHub Actions
 
-[Unreleased]: https://github.com/nikolainobadi/NnGitKit/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnGitKit/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/nikolainobadi/NnGitKit/compare/v0.6.1...v1.0.0
 [0.6.1]: https://github.com/nikolainobadi/NnGitKit/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/nikolainobadi/NnGitKit/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/nikolainobadi/NnGitKit/releases/tag/v0.5.0
