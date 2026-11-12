@@ -19,7 +19,6 @@ let package = Package(
         )
     ],
     targets: [
-        // No dependencies on purpose: NnGitKit must not know about any shell library.
         .target(
             name: "NnGitKit"
         ),
