@@ -119,7 +119,7 @@ try gitHub.createRepo(
 
 ### Errors
 
-Failed commands throw `GitError` or `GitHubError`. Both conform to `LocalizedError`, and their messages include the full command and its output.
+The clients report command failures and unreadable responses with `GitError` or `GitHubError`. Both conform to `LocalizedError`, and their messages include the command or API endpoint and the relevant output. Some lookup methods return `nil` or `false` for non-zero exit codes instead. Errors thrown by your runner propagate to the caller.
 
 ## Testing
 

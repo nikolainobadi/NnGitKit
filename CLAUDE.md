@@ -36,8 +36,8 @@ NnGitKit is a dependency-free Swift package (macOS-only, SPM-only) with two libr
 - `DefaultBranch/`: helpers for detecting a repo's default branch from candidate refs.
 
 **NnGitTesting**: test doubles that re-export NnGitKit.
-- `MockGitCommandRunner` returns scripted results matched by command and path, and throws `UnexpectedCommand` for anything unscripted.
-- `RecordingGitCommandRunner` wraps the mock and records every call (`gitCommands`, `gitHubCommands`).
+- `MockGitCommandRunner` returns the first scripted result matched by command and path, and throws `UnexpectedCommand` for anything unscripted. Results are not consumed; repeated matching calls return the same result.
+- `RecordingGitCommandRunner` wraps the mock and records every call, including unscripted ones. `gitCalls`/`gitHubCalls` include paths; `gitCommands`/`gitHubCommands` contain commands only.
 
 ## Key Patterns
 
@@ -48,6 +48,7 @@ NnGitKit is a dependency-free Swift package (macOS-only, SPM-only) with two libr
 
 ## Testing Conventions
 
+- `Tests/NnGitKitTests/` is organized by component: `Client/GitClient/`, `Client/GitHubClient/`, `Client/Models/`, `DefaultBranch/`, `Running/`, and `NnGitTesting/`.
 - Uses Swift Testing (`import Testing`, `@Test`, `#expect`), not XCTest.
 - Client tests script runner results with `MockGitCommandRunner.GitResult`/`GitHubResult` and assert the exact command sequence through `RecordingGitCommandRunner`.
 - `CommandArgumentsTests` verifies the argument list produced for each command case.

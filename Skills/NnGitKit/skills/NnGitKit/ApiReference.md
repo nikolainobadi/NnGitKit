@@ -252,7 +252,7 @@ public struct GitHubClient: Sendable {
 | `fileContents(atPath:in:)` | `String?` | `.apiReadRaw(endpoint: "repos/<repo>/contents/<path>")` (nil) | API read. Raw, untrimmed content |
 | `licenseSPDX(in:)` | `String?` | `.apiRead(endpoint: "repos/<repo>/license", jq: ".license.spdx_id")` (nil) | API read. `NOASSERTION` → `nil` |
 | `createRepo(_:visibility:license:)` | `Void` | `.createRepo(repo:visibility:license:)` (nil) | throws |
-| `createRepo(_:visibility:description:sourcePath:remote:)` | `Void` | `.createRepoFromSource(...)` (nil) | throws. Pushes an existing local repo and adds `remote` |
+| `createRepo(_:visibility:description:sourcePath:remote:)` | `Void` | `.createRepoFromSource(...)` (nil) | throws. Creates a GitHub repo from an existing local repo and adds `remote`. Does not push commits (`--push` is not passed) |
 | `cloneRepo(_:into:)` | `Void` | `.cloneRepo(repo:destinationPath:)` (nil) | throws |
 
 ### Pull Requests

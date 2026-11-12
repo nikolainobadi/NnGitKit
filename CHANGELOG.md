@@ -13,19 +13,20 @@ Full rewrite. NnGitKit now ships the standalone git/GitHub kit extracted from Gi
 
 ### Added
 - `NnGitKit` library: typed `GitCommand` / `GitHubCommand` enums that produce argument arrays, never shell strings
-- `GitCommandRunner` protocol returning `GitCommandOutput` (exit code and output)
+- `GitCommandRunner` protocol returning `GitCommandOutput` (exit code and output); supply your own process runner to execute commands
 - `GitClient` covering status, branches, commits, remotes, tracking, tags, config, worktrees, discard/reset, merged-branch detection, and commit activity
 - `GitHubClient` covering auth, repos, pull requests, and releases
 - `GitError` and `GitHubError` with descriptive `LocalizedError` messages
 - Default-branch detection helpers
 - `NnGitTesting` library with `MockGitCommandRunner` and `RecordingGitCommandRunner`
+- Claude Code reference skill in `Skills/NnGitKit/` covering the public API and test runners
 
 ### Changed
-- Requires Swift 6.4 tools and macOS 15
+- Requires Swift 6.4 tools and macOS 15; upgrade your toolchain and deployment target before adopting 1.0.0 (breaking)
 - Every target treats warnings as errors
 
 ### Removed
-- `GitShellKit` and `GitCommandGen` libraries (`GitShell`, `GitShellCommand`, `GitHubShellCommand`, `GitStarter`, `GitHubRepoStarter`, `ExecutionMode`, `GitCommandFailure`, `ReleaseNoteSource`)
+- `GitShellKit` and `GitCommandGen` libraries, including `GitShell`, `GitShellCommand`, `GitHubShellCommand`, `GitStarter`, `GitHubRepoStarter`, and `ReleaseNoteInfo`; replace product dependencies and imports with `NnGitKit` and adopt the new clients and runner, or stay on `0.6.x` (breaking)
 
 ## [0.6.1] - 2025-07-01
 
