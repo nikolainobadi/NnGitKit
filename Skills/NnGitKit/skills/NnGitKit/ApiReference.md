@@ -4,7 +4,7 @@ Typed `git`/`gh` commands, a runner protocol, and clients that run and parse the
 
 **Contents**
 - Protocol: GitCommandRunner (Contract, Example runner)
-- Struct: GitClient: Repository & Status · Branches · Commits & Index · Discard & Reset · Tracking · Remotes, Fetch & Push · Worktrees · Tags, Config, Init
+- Struct: GitClient: Repository & Status · Branches · Commits & Index · Discard & Reset · Tracking · Stash · Remotes, Fetch & Push · Worktrees · Tags, Config, Init
 - Struct: GitHubClient: Auth & Repos · Pull Requests · Releases
 - Value Types
 - Enum: GitError · Enum: GitHubError
@@ -175,12 +175,20 @@ Every method below `throws` and takes `at path: String`, the repository (or any 
 |--------|---------|---------|---------------|
 | `trackedPaths(at:)` | `[String]` | `.lsFilesTracked` | throws. Split on NUL, **not trimmed** |
 | `ignoredTrackedPaths(at:)` | `[String]` | `.lsFilesIgnoredTracked` | throws. Split on NUL, not trimmed. Deduplicated, order kept |
+| `ignoredUntrackedPaths(at:)` | `[String]` | `.lsFilesIgnoredOthers` | throws. Split on NUL, not trimmed. Uses every standard exclude source (`.gitignore`, `.git/info/exclude`, global excludes). A fully ignored folder is one entry ending in `/` |
 | `removeFromIndex(paths:at:)` | `Void` | `.removeCached(paths:)` **per batch** | throws. Paths are split into batches of about 128 KB of argument bytes, so a very long list runs several commands |
+
+### Stash
+
+| Method | Returns | Command | Non-zero exit |
+|--------|---------|---------|---------------|
+| `stashEntries(at:)` | `[String]` | `.stashList` | throws. One line per stash, such as `stash@{0}: WIP on main: …`. No stashes → `[]` |
 
 ### Remotes, Fetch & Push
 
 | Method | Returns | Command | Non-zero exit |
 |--------|---------|---------|---------------|
+| `clone(url:to:)` | `Void` | `.clone(url:destination:)` | throws. `destination` must be absolute; runs in its parent folder, which must already exist. Takes no `at path:` |
 | `remoteNames(at:)` | `[String]` | `.remote` | throws |
 | `remoteURL(of:at:)` | `String?` | `.remoteGetURL(name:)` | `nil` |
 | `remoteHeadBranches(for:at:)` | `[String: String]` | `.symbolicRefShort(ref: "refs/remotes/<remote>/HEAD")` per remote | Remotes without HEAD are absent. Values look like `origin/main` |

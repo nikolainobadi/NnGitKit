@@ -10,6 +10,12 @@ extension GitClient {
         return try pathList(.lsFilesIgnoredTracked, at: path).filter { seen.insert($0).inserted }
     }
 
+    /// Untracked paths that git ignores, using every standard exclude source (`.gitignore`,
+    /// `.git/info/exclude`, and the global excludes file). A fully ignored folder is one entry ending in `/`.
+    public func ignoredUntrackedPaths(at path: String) throws -> [String] {
+        return try pathList(.lsFilesIgnoredOthers, at: path)
+    }
+
     public func removeFromIndex(paths: [String], at path: String) throws {
         for group in removalGroups(of: paths) {
             try runExpectingSuccess(.removeCached(paths: group), at: path)

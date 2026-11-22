@@ -25,6 +25,31 @@ struct GitClientTrackingTests {
     }
 
     @Test
+    func `Ignored untracked paths are split on NUL, keeping folder entries' trailing slash`() throws {
+        let sut = makeSUT(results: [(.lsFilesIgnoredOthers, .init(exitCode: 0, output: ".env\0.build/\0Config/GoogleService-Info.plist\0"))])
+
+        #expect(try sut.ignoredUntrackedPaths(at: testRepoPath) == [".env", ".build/", "Config/GoogleService-Info.plist"])
+    }
+
+    @Test
+    func `No ignored untracked paths reads as an empty list`() throws {
+        let sut = makeSUT(results: [(.lsFilesIgnoredOthers, .init(exitCode: 0, output: ""))])
+
+        #expect(try sut.ignoredUntrackedPaths(at: testRepoPath) == [])
+    }
+
+    @Test
+    func `A failed ignored untracked listing throws git's message`() {
+        let sut = makeSUT(results: [(.lsFilesIgnoredOthers, .init(exitCode: 128, output: "fatal: not a git repository"))])
+
+        let error = #expect(throws: GitError.self) {
+            try sut.ignoredUntrackedPaths(at: testRepoPath)
+        }
+
+        expectFailure(error, command: .lsFilesIgnoredOthers, exitCode: 128, output: "fatal: not a git repository")
+    }
+
+    @Test
     func `A failed listing throws git's message`() {
         let sut = makeSUT(results: [(.lsFilesTracked, .init(exitCode: 128, output: "fatal: not a git repository"))])
 

@@ -379,3 +379,25 @@ extension CommandArgumentsTests {
         #expect(GitCommand.diffCached.arguments(at: "/repo") == ["-C", "/repo", "diff", "--cached", "--no-color", "--no-ext-diff"])
     }
 }
+
+// MARK: - Clone, Stash & Ignored Files
+extension CommandArgumentsTests {
+    @Test
+    func `A clone ends options before the URL and passes the destination unchanged`() {
+        let arguments = GitCommand.clone(url: "--upload-pack=x", destination: "/Users/dev/Projects/my app").arguments(at: "/Users/dev/Projects")
+
+        #expect(arguments == ["-C", "/Users/dev/Projects", "clone", "--", "--upload-pack=x", "/Users/dev/Projects/my app"])
+    }
+
+    @Test
+    func `Stashes are listed`() {
+        #expect(GitCommand.stashList.arguments(at: "/repo") == ["-C", "/repo", "stash", "list"])
+    }
+
+    @Test
+    func `Ignored untracked paths use every standard exclude source and collapse ignored folders`() {
+        let arguments = GitCommand.lsFilesIgnoredOthers.arguments(at: "/repo")
+
+        #expect(arguments == ["-C", "/repo", "ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--directory"])
+    }
+}

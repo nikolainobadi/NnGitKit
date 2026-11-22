@@ -119,6 +119,37 @@ struct GitClientRemotesTests {
             try sut.push("main", to: "refs/heads/main", on: "origin", at: testRepoPath)
         }
     }
+
+    @Test
+    func `A clone runs in the destination's parent folder`() throws {
+        let url = "git@github.com:dev/nngit.git"
+        let destination = "/Users/dev/Projects/nngit"
+        let sut = makeSUT(command: .clone(url: url, destination: destination), output: .init(exitCode: 0, output: ""), at: "/Users/dev/Projects")
+
+        try sut.clone(url: url, to: destination)
+    }
+
+    @Test
+    func `A failed clone throws git's message`() {
+        let url = "https://github.com/dev/missing.git"
+        let destination = "/Users/dev/Projects/missing"
+        let command = GitCommand.clone(url: url, destination: destination)
+        let output = "fatal: repository 'https://github.com/dev/missing.git/' not found"
+        let sut = makeSUT(command: command, output: .init(exitCode: 128, output: output), at: "/Users/dev/Projects")
+
+        let error = #expect(throws: GitError.self) {
+            try sut.clone(url: url, to: destination)
+        }
+
+        guard case .commandFailed(let failedCommand, let exitCode, let failedOutput) = error else {
+            Issue.record("Expected a failed command")
+            return
+        }
+
+        #expect(failedCommand == command)
+        #expect(exitCode == 128)
+        #expect(failedOutput == output)
+    }
 }
 
 // MARK: - Helpers
@@ -135,7 +166,11 @@ private extension GitClientRemotesTests {
 // MARK: - SUT
 private extension GitClientRemotesTests {
     func makeSUT(command: GitCommand, output: GitCommandOutput) -> GitClient {
-        let runner = MockGitCommandRunner(gitResults: [.init(command: command, path: testRepoPath, output: output)], gitHubResults: [])
+        return makeSUT(command: command, output: output, at: testRepoPath)
+    }
+
+    func makeSUT(command: GitCommand, output: GitCommandOutput, at path: String) -> GitClient {
+        let runner = MockGitCommandRunner(gitResults: [.init(command: command, path: path, output: output)], gitHubResults: [])
 
         return .init(runner: runner)
     }

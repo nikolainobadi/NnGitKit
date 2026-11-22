@@ -184,7 +184,8 @@ Scripted output must look like what the real command prints, because the client 
 | `commitActivity` | `.logActivity(refs:since:author:)` | `\u{1e}short\0YYYY-MM-DD` then `added\tdeleted\tpath` numstat lines (`-` for binary) |
 | `commitChanges` | `.logCommitChanges(range:)` | `\u{1e}short\0date\0subject`, numstat lines, then ` create mode 100644 path` / ` delete mode ...` summary lines |
 | `commitMessages` | `.logMessages(since:paths:)` | Bodies separated by `\u{1e}` |
-| `trackedPaths`, `ignoredTrackedPaths`, `pathsRestoredByReset`, `unversionedPaths` | their `ls-files`/`diff` command | NUL-separated paths |
+| `trackedPaths`, `ignoredTrackedPaths`, `ignoredUntrackedPaths`, `pathsRestoredByReset`, `unversionedPaths` | their `ls-files`/`diff` command | NUL-separated paths. For `ignoredUntrackedPaths`, ignored folders end in `/` |
+| `stashEntries` | `.stashList` | One line per stash: `stash@{0}: WIP on main: <short> <subject>` |
 | `pullRequest(number:in:)` | `.pullRequestDetails(repo:number:)` | `branch\tOPEN\tfalse` |
 | `contentMergedBranches` | `.revParseTree(ref:)` + `.mergeTreeWriteTree(base:branch:)` per branch | The tree sha. A branch is merged when the first line of merge-tree output equals it |
 
@@ -192,5 +193,6 @@ Scripted output must look like what the real command prints, because the client 
 
 - **`UnexpectedCommand` in a test** means the code ran a command or path you didn't script. Check `runner.gitCalls` to see the exact case and path, including associated values such as `.revParseCommit(ref: "refs/heads/main")`.
 - **Lookups that wrap refs:** `commit(of: "main")` runs `.revParseCommit(ref: "refs/heads/main")`, `commit(ofTag: "v1")` runs `.revParseCommit(ref: "refs/tags/v1")`, and `remoteHeadBranches(for: ["origin"])` runs `.symbolicRefShort(ref: "refs/remotes/origin/HEAD")`.
+- **`clone(url:to:)` has no repository path.** Script `.clone(url:destination:)` at the destination's **parent folder**: `clone(url: u, to: "/Users/dev/Projects/app")` runs at `/Users/dev/Projects`.
 - **Need different outputs for the same command?** The mock can't do that. Restructure the test, or write a small custom `GitCommandRunner` for that case.
 - **Test your runner separately.** `CommandArgumentsTests`-style tests can assert `command.arguments(at:)` / `command.arguments` when you need to check the exact argv.
