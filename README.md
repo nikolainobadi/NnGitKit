@@ -15,7 +15,7 @@ NnGitKit never launches processes itself. You supply a `GitCommandRunner`, so th
 ## Features
 
 - Typed `GitCommand` and `GitHubCommand` enums. Every value is passed as its own argument, never interpolated into shell text
-- `GitClient`: status, branches, commits, remotes, tracking, tags, worktrees, discard/reset, merged-branch detection, commit activity
+- `GitClient`: status, branches, commits, remotes, cloning, tracking, ignored untracked paths, stash listing, tags, worktrees, discard/reset, merged-branch detection, commit activity
 - `GitHubClient`: auth, repos, pull requests, releases
 - Default-branch detection helpers
 - `NnGitTesting` library with `MockGitCommandRunner` and `RecordingGitCommandRunner` for tests
@@ -25,7 +25,7 @@ NnGitKit never launches processes itself. You supply a `GitCommandRunner`, so th
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nikolainobadi/NnGitKit.git", from: "1.0.0")
+    .package(url: "https://github.com/nikolainobadi/NnGitKit.git", from: "1.1.0")
 ],
 targets: [
     .target(

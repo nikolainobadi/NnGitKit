@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-22
+
+### Added
+- `GitClient.clone(url:to:)` to clone a repository to an absolute destination path; the parent folder must already exist and the destination must not.
+- `GitClient.stashEntries(at:)` to list stashes as one string per entry in Git's order.
+- `GitClient.ignoredUntrackedPaths(at:)` to list untracked files ignored by standard exclude sources, collapsing fully ignored folders into entries ending in `/`.
+- `GitCommand.clone(url:destination:)`, `.stashList`, and `.lsFilesIgnoredOthers` for generating the corresponding Git command arguments.
+
 ## [1.0.0] - 2026-11-11
 
 Full rewrite. NnGitKit now ships the standalone git/GitHub kit extracted from GitHappens. The 0.x API is removed; consumers that need it should stay on `0.6.x`.
@@ -52,7 +60,8 @@ Full rewrite. NnGitKit now ships the standalone git/GitHub kit extracted from Gi
 - Swift 6.0 strict concurrency support
 - CI via GitHub Actions
 
-[Unreleased]: https://github.com/nikolainobadi/NnGitKit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/nikolainobadi/NnGitKit/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/nikolainobadi/NnGitKit/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/nikolainobadi/NnGitKit/compare/v0.6.1...v1.0.0
 [0.6.1]: https://github.com/nikolainobadi/NnGitKit/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/nikolainobadi/NnGitKit/compare/v0.5.0...v0.6.0

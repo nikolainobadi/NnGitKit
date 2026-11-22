@@ -8,7 +8,7 @@ user-invocable: true
 
 Dependency-free Swift package that models `git` and `gh` invocations as typed commands and parses their output into value types. It never launches processes: the consumer supplies a `GitCommandRunner`.
 
-**Dependency:** `.package(url: "https://github.com/nikolainobadi/NnGitKit.git", from: "1.0.0")`
+**Dependency:** `.package(url: "https://github.com/nikolainobadi/NnGitKit.git", from: "1.1.0")`
 **Products:** `NnGitKit` (production), `NnGitTesting` (test doubles, re-exports NnGitKit)
 **Platforms:** macOS 15+ | **Swift tools:** 6.4
 <!-- package_path: . --> <!-- this skill lives inside the NnGitKit repo it documents -->

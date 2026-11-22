@@ -32,7 +32,7 @@ NnGitKit is a dependency-free Swift package (macOS-only, SPM-only) with two libr
 
 **NnGitKit**: typed commands plus clients that run and parse them.
 - `Running/`: `GitCommand` and `GitHubCommand` enums model each `git`/`gh` invocation. `GitCommand.arguments(at:)` produces `["-C", path, ...]`, and `GitHubCommand.arguments` produces the `gh` argument list. `GitCommandRunner` is the protocol consumers implement. It returns `GitCommandOutput(exitCode:output:)` and does not throw for non-zero exits.
-- `Client/`: `GitClient` and `GitHubClient` are `Sendable` structs wrapping a runner. Each feature area is its own extension file (`GitClient+Branches`, `+Status`, `+Commits`, `+Remotes`, `+Tracking`, `+Worktrees`, `+Discard`, `+Reset`, `+Tags`, `+Config`, `+Init`, and `GitHubClient+Repos`, `+PullRequests`, `+Releases`), along with the value types they return. Failures surface as `GitError` and `GitHubError` (both `LocalizedError`).
+- `Client/`: `GitClient` and `GitHubClient` are `Sendable` structs wrapping a runner. Each feature area is its own extension file (`GitClient+Branches`, `+Status`, `+Commits`, `+Remotes`, `+Tracking`, `+Stash`, `+Worktrees`, `+Discard`, `+Reset`, `+Tags`, `+Config`, `+Init`, and `GitHubClient+Repos`, `+PullRequests`, `+Releases`), along with the value types they return. Failures surface as `GitError` and `GitHubError` (both `LocalizedError`).
 - `DefaultBranch/`: helpers for detecting a repo's default branch from candidate refs.
 
 **NnGitTesting**: test doubles that re-export NnGitKit.
@@ -44,6 +44,8 @@ NnGitKit is a dependency-free Swift package (macOS-only, SPM-only) with two libr
 - **The package never launches processes.** All execution goes through a consumer-supplied `GitCommandRunner`. NnGitKit must stay free of any shell or process dependency.
 - **Arguments, not shell strings.** Every value is passed as its own argument, so names containing shell metacharacters stay literal.
 - **Exit codes are data.** Runners report non-zero exits, and clients decide whether that is an error (`runExpectingSuccess`) or a meaningful answer (for example, `isAncestor`, or a 404 from the GitHub API meaning "not found").
+- **Cloning runs in the destination's parent folder.** `GitClient.clone(url:to:)` takes an absolute destination, with an existing parent folder and no existing destination. It runs `.clone(url:destination:)` at that parent path; mock results must use the parent path too.
+- **Ignored path listings differ.** `ignoredTrackedPaths(at:)` finds tracked files matching `.gitignore`; `ignoredUntrackedPaths(at:)` uses all standard exclude sources and collapses fully ignored folders into entries ending in `/`. Its output is NUL-separated and paths are not trimmed.
 - New git or gh functionality means adding a `GitCommand`/`GitHubCommand` case with its arguments, a client method that runs and parses it, and tests at both levels.
 
 ## Testing Conventions

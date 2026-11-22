@@ -94,7 +94,7 @@ public struct GitClient: Sendable {
 }
 ```
 
-Every method below `throws` and takes `at path: String`, the repository (or any directory inside it). The exceptions are the worktree add/remove methods, which take `in path:` (see Worktrees).
+Every method below `throws` and takes `at path: String`, the repository (or any directory inside it). The exceptions are the worktree add/remove methods, which take `in path:` (see Worktrees), and `clone(url:to:)`, which runs in the destination's parent folder (see Remotes, Fetch & Push).
 
 ### Repository & Status
 
@@ -188,7 +188,7 @@ Every method below `throws` and takes `at path: String`, the repository (or any 
 
 | Method | Returns | Command | Non-zero exit |
 |--------|---------|---------|---------------|
-| `clone(url:to:)` | `Void` | `.clone(url:destination:)` | throws. `destination` must be absolute; runs in its parent folder, which must already exist. Takes no `at path:` |
+| `clone(url:to:)` | `Void` | `.clone(url:destination:)` | throws. `destination` must be absolute and must not already exist; runs in its parent folder, which must already exist. Takes no `at path:` |
 | `remoteNames(at:)` | `[String]` | `.remote` | throws |
 | `remoteURL(of:at:)` | `String?` | `.remoteGetURL(name:)` | `nil` |
 | `remoteHeadBranches(for:at:)` | `[String: String]` | `.symbolicRefShort(ref: "refs/remotes/<remote>/HEAD")` per remote | Remotes without HEAD are absent. Values look like `origin/main` |
